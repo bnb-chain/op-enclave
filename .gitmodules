@@ -13,3 +13,6 @@
 [submodule "contracts/lib/opbnb-contracts"]
 	path = contracts/lib/opbnb-contracts
 	url = https://github.com/bnb-chain/opbnb
+[submodule "contracts/lib/opbnb"]
+	path = contracts/lib/opbnb
+	url = https://github.com/bnb-chain/opbnb
