@@ -4,7 +4,7 @@ pragma solidity ^0.8.15;
 import {Test, console} from "forge-std/Test.sol";
 import {CertManager} from "@nitro-validator/CertManager.sol";
 
-import "../src/SystemConfigGlobal.sol";
+import "../src/base/SystemConfigGlobal.sol";
 
 contract SystemConfigGlobalTest is Test {
     SystemConfigGlobal systemConfigGlobal;

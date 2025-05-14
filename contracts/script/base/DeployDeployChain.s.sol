@@ -3,7 +3,7 @@ pragma solidity 0.8.15;
 
 import {Script} from "forge-std/Script.sol";
 import {console2 as console} from "forge-std/console2.sol";
-import {DeployChain} from "../src/DeployChain.sol";
+import {DeployChain} from "../../src/base/DeployChain.sol";
 import {Artifacts} from "@eth-optimism-bedrock/scripts/Artifacts.s.sol";
 import {Config} from "@eth-optimism-bedrock/scripts/libraries/Config.sol";
 

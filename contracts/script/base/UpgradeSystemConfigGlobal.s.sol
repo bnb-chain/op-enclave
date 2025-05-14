@@ -3,10 +3,10 @@ pragma solidity 0.8.15;
 
 import {Script} from "forge-std/Script.sol";
 import {console2 as console} from "forge-std/console2.sol";
-import {DeployChain} from "../src/DeployChain.sol";
+import {DeployChain} from "../../src/base/DeployChain.sol";
 import {Artifacts} from "@eth-optimism-bedrock/scripts/Artifacts.s.sol";
 import {ProxyAdmin} from "@eth-optimism-bedrock/src/universal/ProxyAdmin.sol";
-import {SystemConfigGlobal} from "../src/SystemConfigGlobal.sol";
+import {SystemConfigGlobal} from "../../src/base/SystemConfigGlobal.sol";
 import {ICertManager} from "@nitro-validator/ICertManager.sol";
 import {IGnosisSafe, Enum} from "@eth-optimism-bedrock/scripts/interfaces/IGnosisSafe.sol";
 

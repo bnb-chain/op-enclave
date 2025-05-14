@@ -13,12 +13,12 @@ import {SuperchainConfig} from "@eth-optimism-bedrock/src/L1/SuperchainConfig.so
 import {OptimismPortal} from "@eth-optimism-bedrock/src/L1/OptimismPortal.sol";
 import {IL2OutputOracle} from "@eth-optimism-bedrock/src/L1/interfaces/IL2OutputOracle.sol";
 import {ProtocolVersions} from "@eth-optimism-bedrock/src/L1/ProtocolVersions.sol";
-import {Portal} from "src/Portal.sol";
-import {OutputOracle} from "src/OutputOracle.sol";
-import {OwnerConfig} from "src/OwnerConfig.sol";
-import {SystemConfigOwnable} from "src/SystemConfigOwnable.sol";
-import {SystemConfigGlobal} from "src/SystemConfigGlobal.sol";
-import {DeployChain} from "src/DeployChain.sol";
+import {Portal} from "../../src/base/Portal.sol";
+import {OutputOracle} from "../../src/base/OutputOracle.sol";
+import {OwnerConfig} from "../../src/base/OwnerConfig.sol";
+import {SystemConfigOwnable} from "../../src/base/SystemConfigOwnable.sol";
+import {SystemConfigGlobal} from "../../src/base/SystemConfigGlobal.sol";
+import {DeployChain} from "../../src/base/DeployChain.sol";
 import {Constants} from "@eth-optimism-bedrock/src/libraries/Constants.sol";
 import {ResourceMetering} from "@eth-optimism-bedrock/src/L1/ResourceMetering.sol";
 import {IResourceMetering} from "@eth-optimism-bedrock/src/L1/interfaces/IResourceMetering.sol";
@@ -123,15 +123,22 @@ contract DeploySystem is Deploy {
 
     function checkCertManager() public {
         console.log("Retrieving CertManager deploy");
-        string memory deploymentOutfile =
-            string.concat(vm.projectRoot(), "/deployments/", vm.toString(block.chainid), "-certmanager.json");
-        address certManagerAddress = vm.parseJsonAddress(vm.readFile(deploymentOutfile), ".CertManager");
+        string memory deploymentOutfile = string.concat(
+            vm.projectRoot(),
+            "/deployments/",
+            vm.toString(block.chainid),
+            "-certmanager.json"
+        );
+        address certManagerAddress = vm.parseJsonAddress(
+            vm.readFile(deploymentOutfile),
+            ".CertManager"
+        );
         save("CertManager", certManagerAddress);
 
-        bytes memory parent =
-            hex"3082021130820196a003020102021100f93175681b90afe11d46ccb4e4e7f856300a06082a8648ce3d0403033049310b3009060355040613025553310f300d060355040a0c06416d617a6f6e310c300a060355040b0c03415753311b301906035504030c126177732e6e6974726f2d656e636c61766573301e170d3139313032383133323830355a170d3439313032383134323830355a3049310b3009060355040613025553310f300d060355040a0c06416d617a6f6e310c300a060355040b0c03415753311b301906035504030c126177732e6e6974726f2d656e636c617665733076301006072a8648ce3d020106052b8104002203620004fc0254eba608c1f36870e29ada90be46383292736e894bfff672d989444b5051e534a4b1f6dbe3c0bc581a32b7b176070ede12d69a3fea211b66e752cf7dd1dd095f6f1370f4170843d9dc100121e4cf63012809664487c9796284304dc53ff4a3423040300f0603551d130101ff040530030101ff301d0603551d0e041604149025b50dd90547e796c396fa729dcf99a9df4b96300e0603551d0f0101ff040403020186300a06082a8648ce3d0403030369003066023100a37f2f91a1c9bd5ee7b8627c1698d255038e1f0343f95b63a9628c3d39809545a11ebcbf2e3b55d8aeee71b4c3d6adf3023100a2f39b1605b27028a5dd4ba069b5016e65b4fbde8fe0061d6a53197f9cdaf5d943bc61fc2beb03cb6fee8d2302f3dff6";
-        bytes memory cert =
-            hex"308202bf30820244a00302010202100b93e39c65609c59e8144a2ad34ba3a0300a06082a8648ce3d0403033049310b3009060355040613025553310f300d060355040a0c06416d617a6f6e310c300a060355040b0c03415753311b301906035504030c126177732e6e6974726f2d656e636c61766573301e170d3234313132333036333235355a170d3234313231333037333235355a3064310b3009060355040613025553310f300d060355040a0c06416d617a6f6e310c300a060355040b0c034157533136303406035504030c2d353133623665666332313639303264372e75732d656173742d312e6177732e6e6974726f2d656e636c617665733076301006072a8648ce3d020106052b8104002203620004ee78108039725a03e0b63a5d7d1244f6294eb7631f305e360997c8e5c06c779f23cfaeb64cb9aeac8a031bfac9f4dafc3621b4367f003c08c0ce410c2118396cc5d56ec4e92e1b17f9709b2bffcef462f7bcb97d6ca11325c4a30156c9720de7a381d53081d230120603551d130101ff040830060101ff020102301f0603551d230418301680149025b50dd90547e796c396fa729dcf99a9df4b96301d0603551d0e041604142b3d75d274a3cdd61b2c13f539e08c960ce757dd300e0603551d0f0101ff040403020186306c0603551d1f046530633061a05fa05d865b687474703a2f2f6177732d6e6974726f2d656e636c617665732d63726c2e73332e616d617a6f6e6177732e636f6d2f63726c2f61623439363063632d376436332d343262642d396539662d3539333338636236376638342e63726c300a06082a8648ce3d0403030369003066023100fce7a6c2b38e0a8ebf0d28348d74463458b84bfe8b2b95315dd4da665e8e83d4ab911852a4e92a8263ecf571d2df3b89023100ab92be511136be76aa313018f9f4825eaad602d0342d268e6da632767f68f55f761fa9fd2a7ee716c481c67f26e3f8f4";
+        bytes
+            memory parent = hex"3082021130820196a003020102021100f93175681b90afe11d46ccb4e4e7f856300a06082a8648ce3d0403033049310b3009060355040613025553310f300d060355040a0c06416d617a6f6e310c300a060355040b0c03415753311b301906035504030c126177732e6e6974726f2d656e636c61766573301e170d3139313032383133323830355a170d3439313032383134323830355a3049310b3009060355040613025553310f300d060355040a0c06416d617a6f6e310c300a060355040b0c03415753311b301906035504030c126177732e6e6974726f2d656e636c617665733076301006072a8648ce3d020106052b8104002203620004fc0254eba608c1f36870e29ada90be46383292736e894bfff672d989444b5051e534a4b1f6dbe3c0bc581a32b7b176070ede12d69a3fea211b66e752cf7dd1dd095f6f1370f4170843d9dc100121e4cf63012809664487c9796284304dc53ff4a3423040300f0603551d130101ff040530030101ff301d0603551d0e041604149025b50dd90547e796c396fa729dcf99a9df4b96300e0603551d0f0101ff040403020186300a06082a8648ce3d0403030369003066023100a37f2f91a1c9bd5ee7b8627c1698d255038e1f0343f95b63a9628c3d39809545a11ebcbf2e3b55d8aeee71b4c3d6adf3023100a2f39b1605b27028a5dd4ba069b5016e65b4fbde8fe0061d6a53197f9cdaf5d943bc61fc2beb03cb6fee8d2302f3dff6";
+        bytes
+            memory cert = hex"308202bf30820244a00302010202100b93e39c65609c59e8144a2ad34ba3a0300a06082a8648ce3d0403033049310b3009060355040613025553310f300d060355040a0c06416d617a6f6e310c300a060355040b0c03415753311b301906035504030c126177732e6e6974726f2d656e636c61766573301e170d3234313132333036333235355a170d3234313231333037333235355a3064310b3009060355040613025553310f300d060355040a0c06416d617a6f6e310c300a060355040b0c034157533136303406035504030c2d353133623665666332313639303264372e75732d656173742d312e6177732e6e6974726f2d656e636c617665733076301006072a8648ce3d020106052b8104002203620004ee78108039725a03e0b63a5d7d1244f6294eb7631f305e360997c8e5c06c779f23cfaeb64cb9aeac8a031bfac9f4dafc3621b4367f003c08c0ce410c2118396cc5d56ec4e92e1b17f9709b2bffcef462f7bcb97d6ca11325c4a30156c9720de7a381d53081d230120603551d130101ff040830060101ff020102301f0603551d230418301680149025b50dd90547e796c396fa729dcf99a9df4b96301d0603551d0e041604142b3d75d274a3cdd61b2c13f539e08c960ce757dd300e0603551d0f0101ff040403020186306c0603551d1f046530633061a05fa05d865b687474703a2f2f6177732d6e6974726f2d656e636c617665732d63726c2e73332e616d617a6f6e6177732e636f6d2f63726c2f61623439363063632d376436332d343262642d396539662d3539333338636236376638342e63726c300a06082a8648ce3d0403030369003066023100fce7a6c2b38e0a8ebf0d28348d74463458b84bfe8b2b95315dd4da665e8e83d4ab911852a4e92a8263ecf571d2df3b89023100ab92be511136be76aa313018f9f4825eaad602d0342d268e6da632767f68f55f761fa9fd2a7ee716c481c67f26e3f8f4";
 
         uint256 timestamp = vm.getBlockTimestamp();
         vm.warp(1732580000);
@@ -139,13 +146,21 @@ contract DeploySystem is Deploy {
         vm.warp(timestamp);
     }
 
-    function deploySystemConfigOwnable() public broadcast returns (address addr_) {
+    function deploySystemConfigOwnable()
+        public
+        broadcast
+        returns (address addr_)
+    {
         console.log("Deploying OwnerConfig");
-        OwnerConfig ownerConfig = new OwnerConfig{salt: _implSalt()}(cfg.finalSystemOwner());
+        OwnerConfig ownerConfig = new OwnerConfig{salt: _implSalt()}(
+            cfg.finalSystemOwner()
+        );
         save("OwnerConfig", address(ownerConfig));
 
         console.log("Deploying SystemConfig implementation");
-        addr_ = address(new SystemConfigOwnable{salt: _implSalt()}(ownerConfig));
+        addr_ = address(
+            new SystemConfigOwnable{salt: _implSalt()}(ownerConfig)
+        );
         save("SystemConfig", addr_);
         console.log("SystemConfig deployed at %s", addr_);
 
@@ -157,9 +172,17 @@ contract DeploySystem is Deploy {
         checkSystemConfig({_contracts: contracts, _cfg: cfg, _isProxy: false});
     }
 
-    function deploySystemConfigGlobal() public broadcast returns (address addr_) {
+    function deploySystemConfigGlobal()
+        public
+        broadcast
+        returns (address addr_)
+    {
         console.log("Deploying SystemConfigGlobal implementation");
-        addr_ = address(new SystemConfigGlobal{salt: _implSalt()}(ICertManager(mustGetAddress("CertManager"))));
+        addr_ = address(
+            new SystemConfigGlobal{salt: _implSalt()}(
+                ICertManager(mustGetAddress("CertManager"))
+            )
+        );
         save("SystemConfigGlobal", addr_);
         console.log("SystemConfigGlobal deployed at %s", addr_);
     }
@@ -175,11 +198,17 @@ contract DeploySystem is Deploy {
         // are always proxies.
         Types.ContractSet memory contracts = _proxiesUnstrict();
         contracts.OptimismPortal = addr_;
-        ChainAssertions.checkOptimismPortal({_contracts: contracts, _cfg: cfg, _isProxy: false});
+        ChainAssertions.checkOptimismPortal({
+            _contracts: contracts,
+            _cfg: cfg,
+            _isProxy: false
+        });
     }
 
     function deployOutputOracle() public broadcast returns (address addr_) {
-        SystemConfigGlobal systemConfigGlobal = SystemConfigGlobal(mustGetAddress("SystemConfigGlobalProxy"));
+        SystemConfigGlobal systemConfigGlobal = SystemConfigGlobal(
+            mustGetAddress("SystemConfigGlobalProxy")
+        );
 
         console.log("Deploying L2OutputOracle implementation");
         OutputOracle oracle = new OutputOracle{salt: _implSalt()}(
@@ -195,7 +224,11 @@ contract DeploySystem is Deploy {
         // are always proxies.
         Types.ContractSet memory contracts = _proxiesUnstrict();
         contracts.L2OutputOracle = address(oracle);
-        checkL2OutputOracle({_contracts: contracts, _cfg: cfg, _isProxy: false});
+        checkL2OutputOracle({
+            _contracts: contracts,
+            _cfg: cfg,
+            _isProxy: false
+        });
 
         addr_ = address(oracle);
     }
@@ -209,8 +242,12 @@ contract DeploySystem is Deploy {
             _systemConfig: mustGetAddress("SystemConfigProxy"),
             _l1StandardBridge: mustGetAddress("L1StandardBridgeProxy"),
             _l1ERC721Bridge: mustGetAddress("L1ERC721BridgeProxy"),
-            _optimismMintableERC20Factory: mustGetAddress("OptimismMintableERC20FactoryProxy"),
-            _l1CrossDomainMessenger: mustGetAddress("L1CrossDomainMessengerProxy"),
+            _optimismMintableERC20Factory: mustGetAddress(
+                "OptimismMintableERC20FactoryProxy"
+            ),
+            _l1CrossDomainMessenger: mustGetAddress(
+                "L1CrossDomainMessengerProxy"
+            ),
             _l2OutputOracle: mustGetAddress("L2OutputOracleProxy"),
             _superchainConfig: mustGetAddress("SuperchainConfigProxy"),
             _protocolVersions: mustGetAddress("ProtocolVersionsProxy")
@@ -227,7 +264,9 @@ contract DeploySystem is Deploy {
         address systemConfigProxy = mustGetAddress("SystemConfigProxy");
         address systemConfig = mustGetAddress("SystemConfig");
 
-        bytes32 batcherHash = bytes32(uint256(uint160(cfg.batchSenderAddress())));
+        bytes32 batcherHash = bytes32(
+            uint256(uint160(cfg.batchSenderAddress()))
+        );
 
         _upgradeAndCallViaSafe({
             _proxy: payable(systemConfigProxy),
@@ -244,12 +283,20 @@ contract DeploySystem is Deploy {
                     cfg.batchInboxAddress(),
                     address(0),
                     SystemConfig.Addresses({
-                        l1CrossDomainMessenger: mustGetAddress("L1CrossDomainMessengerProxy"),
+                        l1CrossDomainMessenger: mustGetAddress(
+                            "L1CrossDomainMessengerProxy"
+                        ),
                         l1ERC721Bridge: mustGetAddress("L1ERC721BridgeProxy"),
-                        l1StandardBridge: mustGetAddress("L1StandardBridgeProxy"),
-                        disputeGameFactory: mustGetAddress("DisputeGameFactoryProxy"),
+                        l1StandardBridge: mustGetAddress(
+                            "L1StandardBridgeProxy"
+                        ),
+                        disputeGameFactory: mustGetAddress(
+                            "DisputeGameFactoryProxy"
+                        ),
                         optimismPortal: mustGetAddress("OptimismPortalProxy"),
-                        optimismMintableERC20Factory: mustGetAddress("OptimismMintableERC20FactoryProxy"),
+                        optimismMintableERC20Factory: mustGetAddress(
+                            "OptimismMintableERC20FactoryProxy"
+                        ),
                         gasPayingToken: Constants.ETHER
                     })
                 )
@@ -265,7 +312,9 @@ contract DeploySystem is Deploy {
 
     function initializeSystemConfigGlobal() public broadcast {
         console.log("Upgrading and initializing SystemConfigGlobal proxy");
-        address systemConfigGlobalProxy = mustGetAddress("SystemConfigGlobalProxy");
+        address systemConfigGlobalProxy = mustGetAddress(
+            "SystemConfigGlobalProxy"
+        );
         address systemConfigGlobal = mustGetAddress("SystemConfigGlobal");
 
         string memory _json;
@@ -273,15 +322,22 @@ contract DeploySystem is Deploy {
         try vm.readFile(_path) returns (string memory data) {
             _json = data;
         } catch {
-            require(false, string.concat("Cannot find deploy config file at ", _path));
+            require(
+                false,
+                string.concat("Cannot find deploy config file at ", _path)
+            );
         }
-        address systemConfigGlobalManager = stdJson.readAddress(_json, "$.systemConfigGlobalManager");
+        address systemConfigGlobalManager = stdJson.readAddress(
+            _json,
+            "$.systemConfigGlobalManager"
+        );
 
         _upgradeAndCallViaSafe({
             _proxy: payable(systemConfigGlobalProxy),
             _implementation: systemConfigGlobal,
             _innerCallData: abi.encodeCall(
-                SystemConfigGlobal.initialize, (cfg.finalSystemOwner(), systemConfigGlobalManager)
+                SystemConfigGlobal.initialize,
+                (cfg.finalSystemOwner(), systemConfigGlobalManager)
             )
         });
 
@@ -315,7 +371,11 @@ contract DeploySystem is Deploy {
         string memory version = portal.version();
         console.log("OptimismPortal version: %s", version);
 
-        ChainAssertions.checkOptimismPortal({_contracts: _proxies(), _cfg: cfg, _isProxy: true});
+        ChainAssertions.checkOptimismPortal({
+            _contracts: _proxies(),
+            _cfg: cfg,
+            _isProxy: true
+        });
     }
 
     function initializeOutputOracle() public broadcast {
@@ -327,22 +387,37 @@ contract DeploySystem is Deploy {
         _upgradeAndCallViaSafe({
             _proxy: payable(l2OutputOracleProxy),
             _implementation: l2OutputOracle,
-            _innerCallData: abi.encodeCall(OutputOracle.initialize, (SystemConfigOwnable(systemConfigProxy), 0, 0, false))
+            _innerCallData: abi.encodeCall(
+                OutputOracle.initialize,
+                (SystemConfigOwnable(systemConfigProxy), 0, 0, false)
+            )
         });
 
         OutputOracle oracle = OutputOracle(l2OutputOracleProxy);
         string memory version = oracle.version();
         console.log("L2OutputOracle version: %s", version);
 
-        checkL2OutputOracle({_contracts: _proxies(), _cfg: cfg, _isProxy: true});
+        checkL2OutputOracle({
+            _contracts: _proxies(),
+            _cfg: cfg,
+            _isProxy: true
+        });
     }
 
-    function checkL2OutputOracle(Types.ContractSet memory _contracts, DeployConfig _cfg, bool _isProxy) internal view {
+    function checkL2OutputOracle(
+        Types.ContractSet memory _contracts,
+        DeployConfig _cfg,
+        bool _isProxy
+    ) internal view {
         console.log("Running chain assertions on the L2OutputOracle");
         OutputOracle oracle = OutputOracle(_contracts.L2OutputOracle);
 
         // Check that the contract is initialized
-        ChainAssertions.assertSlotValueIsOne({_contractAddress: address(oracle), _slot: 0, _offset: 0});
+        ChainAssertions.assertSlotValueIsOne({
+            _contractAddress: address(oracle),
+            _slot: 0,
+            _offset: 0
+        });
 
         if (_isProxy) {
             require(oracle.proposer() == _cfg.l2OutputOracleProposer());
@@ -351,42 +426,74 @@ contract DeploySystem is Deploy {
         }
     }
 
-    function checkSystemConfig(Types.ContractSet memory _contracts, DeployConfig _cfg, bool _isProxy) internal view {
+    function checkSystemConfig(
+        Types.ContractSet memory _contracts,
+        DeployConfig _cfg,
+        bool _isProxy
+    ) internal view {
         console.log("Running chain assertions on the SystemConfig");
         SystemConfig config = SystemConfig(_contracts.SystemConfig);
 
         // Check that the contract is initialized
-        ChainAssertions.assertSlotValueIsOne({_contractAddress: address(config), _slot: 0, _offset: 0});
+        ChainAssertions.assertSlotValueIsOne({
+            _contractAddress: address(config),
+            _slot: 0,
+            _offset: 0
+        });
 
-        IResourceMetering.ResourceConfig memory resourceConfig = config.resourceConfig();
+        IResourceMetering.ResourceConfig memory resourceConfig = config
+            .resourceConfig();
 
         if (_isProxy) {
             require(config.owner() == _cfg.finalSystemOwner());
             require(config.basefeeScalar() == _cfg.basefeeScalar());
             require(config.blobbasefeeScalar() == _cfg.blobbasefeeScalar());
-            require(config.batcherHash() == bytes32(uint256(uint160(_cfg.batchSenderAddress()))));
+            require(
+                config.batcherHash() ==
+                    bytes32(uint256(uint160(_cfg.batchSenderAddress())))
+            );
             require(config.gasLimit() == uint64(_cfg.l2GenesisBlockGasLimit()));
             require(config.unsafeBlockSigner() == _cfg.p2pSequencerAddress());
             require(config.scalar() >> 248 == 1);
             // Check _config
-            IResourceMetering.ResourceConfig memory rconfig = Constants.DEFAULT_RESOURCE_CONFIG();
-            require(resourceConfig.maxResourceLimit == rconfig.maxResourceLimit);
-            require(resourceConfig.elasticityMultiplier == rconfig.elasticityMultiplier);
-            require(resourceConfig.baseFeeMaxChangeDenominator == rconfig.baseFeeMaxChangeDenominator);
+            IResourceMetering.ResourceConfig memory rconfig = Constants
+                .DEFAULT_RESOURCE_CONFIG();
+            require(
+                resourceConfig.maxResourceLimit == rconfig.maxResourceLimit
+            );
+            require(
+                resourceConfig.elasticityMultiplier ==
+                    rconfig.elasticityMultiplier
+            );
+            require(
+                resourceConfig.baseFeeMaxChangeDenominator ==
+                    rconfig.baseFeeMaxChangeDenominator
+            );
             require(resourceConfig.systemTxMaxGas == rconfig.systemTxMaxGas);
             require(resourceConfig.minimumBaseFee == rconfig.minimumBaseFee);
             require(resourceConfig.maximumBaseFee == rconfig.maximumBaseFee);
             // Depends on start block being set to 0 in `initialize`
             uint256 cfgStartBlock = _cfg.systemConfigStartBlock();
-            require(config.startBlock() == (cfgStartBlock == 0 ? block.number : cfgStartBlock));
+            require(
+                config.startBlock() ==
+                    (cfgStartBlock == 0 ? block.number : cfgStartBlock)
+            );
             require(config.batchInbox() == _cfg.batchInboxAddress());
             // Check _addresses
-            require(config.l1CrossDomainMessenger() == _contracts.L1CrossDomainMessenger);
+            require(
+                config.l1CrossDomainMessenger() ==
+                    _contracts.L1CrossDomainMessenger
+            );
             require(config.l1ERC721Bridge() == _contracts.L1ERC721Bridge);
             require(config.l1StandardBridge() == _contracts.L1StandardBridge);
-            require(config.disputeGameFactory() == _contracts.DisputeGameFactory);
+            require(
+                config.disputeGameFactory() == _contracts.DisputeGameFactory
+            );
             require(config.optimismPortal() == _contracts.OptimismPortal);
-            require(config.optimismMintableERC20Factory() == _contracts.OptimismMintableERC20Factory);
+            require(
+                config.optimismMintableERC20Factory() ==
+                    _contracts.OptimismMintableERC20Factory
+            );
         } else {
             require(config.owner() == _cfg.finalSystemOwner());
             require(config.overhead() == 0);

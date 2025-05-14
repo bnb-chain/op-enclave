@@ -5,10 +5,10 @@ import {Test, console} from "forge-std/Test.sol";
 import {ICertManager} from "@nitro-validator/ICertManager.sol";
 import {ProxyAdmin} from "@eth-optimism-bedrock/src/universal/ProxyAdmin.sol";
 
-import "../src/ResolvingProxyFactory.sol";
-import "../src/SystemConfigGlobal.sol";
-import "../src/SystemConfigOwnable.sol";
-import "../src/OutputOracle.sol";
+import "../src/base/ResolvingProxyFactory.sol";
+import "../src/base/SystemConfigGlobal.sol";
+import "../src/base/SystemConfigOwnable.sol";
+import "../src/base/OutputOracle.sol";
 
 contract OutputOracleTest is Test {
     OutputOracle internal outputOracle;
