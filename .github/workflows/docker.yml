@@ -1,12 +1,17 @@
 name: Tag Docker image
 
 on:
+  workflow_dispatch:  
+    inputs:
+      tag:
+        description: 'Image tag (optional)'
+        required: false
+        default: 'latest'
   push:
+    tags: '*'
     branches:
-      - 'main'
-    tags:
-      - 'v*'
-
+      - develop
+      - main
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
