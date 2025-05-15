@@ -127,6 +127,7 @@ contract L2OutputOracle is Initializable, ISemver {
         proposer = _proposer;
         challenger = _challenger;
         finalizationPeriodSeconds = _finalizationPeriodSeconds;
+        configHash = _configHash;
         proofsEnabled = _proofsEnabled;
 
         l2Outputs.push(

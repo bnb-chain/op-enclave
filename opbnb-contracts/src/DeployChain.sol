@@ -221,7 +221,16 @@ contract DeployChain is Ownable {
         bool proofsEnabled
     ) internal {
         L2OutputOracle(addresses.l2OutputOracle).initialize(
-            SystemConfigOwnable(addresses.systemConfig), hashes.configHash, hashes.genesisOutputRoot, proofsEnabled
+            0,
+            0,
+            0,
+            0,
+            addressConfig.proposer,
+            addressConfig.proposer,
+            0,
+            hashes.configHash,
+            hashes.genesisOutputRoot,
+            proofsEnabled
         );
 
         Portal(payable(addresses.optimismPortal)).initialize(

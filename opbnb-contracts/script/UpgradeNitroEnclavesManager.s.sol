@@ -19,7 +19,8 @@ contract UpgradeNitroEnclavesManager is Script, Artifacts {
         console.log("Deploying NitroEnclavesManager implementation");
         vm.startBroadcast();
 
-        address addr_ = address(new NitroEnclavesManager{salt: _implSalt()}(ICertManager(mustGetAddress("CertManager"))));
+        address addr_ =
+            address(new NitroEnclavesManager{salt: _implSalt()}(ICertManager(mustGetAddress("CertManager"))));
         bytes memory data =
             abi.encodeCall(ProxyAdmin.upgrade, (payable(mustGetAddress("NitroEnclavesManagerProxy")), address(addr_)));
         IGnosisSafe(mustGetAddress("SystemOwnerSafe")).execTransaction({
