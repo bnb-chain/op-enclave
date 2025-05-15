@@ -3,12 +3,12 @@ pragma solidity 0.8.15;
 
 import {Script} from "forge-std/Script.sol";
 import {console2 as console} from "forge-std/console2.sol";
-import {Config} from "@eth-optimism-bedrock/scripts/libraries/Config.sol";
-import {ProxyAdmin} from "@eth-optimism-bedrock/src/universal/ProxyAdmin.sol";
-import {Proxy} from "@eth-optimism-bedrock/src/universal/Proxy.sol";
-import {SystemConfigOwnable} from "../../src/base/SystemConfigOwnable.sol";
-import {OwnerConfig} from "../../src/base/OwnerConfig.sol";
-import {IGnosisSafe, Enum} from "@eth-optimism-bedrock/scripts/interfaces/IGnosisSafe.sol";
+import {Config} from "@opbnb-bedrock/scripts/Config.sol";
+import {ProxyAdmin} from "@opbnb-bedrock/src/universal/ProxyAdmin.sol";
+import {Proxy} from "@opbnb-bedrock/src/universal/Proxy.sol";
+import {SystemConfigOwnable} from "../src/SystemConfigOwnable.sol";
+import {OwnerConfig} from "../src/OwnerConfig.sol";
+import {IGnosisSafe, Enum} from "@opbnb-bedrock/scripts/interfaces/IGnosisSafe.sol";
 
 contract UpgradeSystemConfigOwnable is Script {
     function run() public {

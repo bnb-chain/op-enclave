@@ -1,27 +1,24 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.15;
 
-import {Deploy} from "@eth-optimism-bedrock/scripts/deploy/Deploy.s.sol";
-import {DeployConfig} from "@eth-optimism-bedrock/scripts/deploy/DeployConfig.s.sol";
-import {Config} from "@eth-optimism-bedrock/scripts/libraries/Config.sol";
-import {Types} from "@eth-optimism-bedrock/scripts/libraries/Types.sol";
-import {ChainAssertions} from "@eth-optimism-bedrock/scripts/deploy/ChainAssertions.sol";
-import {SystemConfig} from "@eth-optimism-bedrock/src/L1/SystemConfig.sol";
-import {ISystemConfig} from "@eth-optimism-bedrock/src/L1/interfaces/ISystemConfig.sol";
-import {ISuperchainConfig} from "@eth-optimism-bedrock/src/L1/interfaces/ISuperchainConfig.sol";
-import {SuperchainConfig} from "@eth-optimism-bedrock/src/L1/SuperchainConfig.sol";
-import {OptimismPortal} from "@eth-optimism-bedrock/src/L1/OptimismPortal.sol";
-import {IL2OutputOracle} from "@eth-optimism-bedrock/src/L1/interfaces/IL2OutputOracle.sol";
-import {ProtocolVersions} from "@eth-optimism-bedrock/src/L1/ProtocolVersions.sol";
-import {Portal} from "../../src/base/Portal.sol";
-import {OutputOracle} from "../../src/base/OutputOracle.sol";
-import {OwnerConfig} from "../../src/base/OwnerConfig.sol";
-import {SystemConfigOwnable} from "../../src/base/SystemConfigOwnable.sol";
-import {SystemConfigGlobal} from "../../src/base/SystemConfigGlobal.sol";
-import {DeployChain} from "../../src/base/DeployChain.sol";
-import {Constants} from "@eth-optimism-bedrock/src/libraries/Constants.sol";
-import {ResourceMetering} from "@eth-optimism-bedrock/src/L1/ResourceMetering.sol";
-import {IResourceMetering} from "@eth-optimism-bedrock/src/L1/interfaces/IResourceMetering.sol";
+import {Deploy} from "@opbnb-bedrock/scripts/Deploy.s.sol";
+import {DeployConfig} from "@opbnb-bedrock/scripts/DeployConfig.s.sol";
+import {Config} from "@opbnb-bedrock/scripts/Config.sol";
+import {Types} from "@opbnb-bedrock/scripts/Types.sol";
+import {ChainAssertions} from "@opbnb-bedrock/scripts/ChainAssertions.sol";
+import {SystemConfig} from "@opbnb-bedrock/src/L1/SystemConfig.sol";
+import {SuperchainConfig} from "@opbnb-bedrock/src/L1/SuperchainConfig.sol";
+import {SuperchainConfig} from "@opbnb-bedrock/src/L1/SuperchainConfig.sol";
+import {OptimismPortal} from "@opbnb-bedrock/src/L1/OptimismPortal.sol";
+import {ProtocolVersions} from "@opbnb-bedrock/src/L1/ProtocolVersions.sol";
+import {Portal} from "../src/Portal.sol";
+import {L2OutputOracle} from "../src/L2OutputOracle.sol";
+import {OwnerConfig} from "../src/OwnerConfig.sol";
+import {SystemConfigOwnable} from "../src/SystemConfigOwnable.sol";
+import {NitroEnclavesManager} from "../src/NitroEnclavesManager.sol";
+import {DeployChain} from "../src/DeployChain.sol";
+import {Constants} from "@opbnb-bedrock/src/libraries/Constants.sol";
+import {ResourceMetering} from "@opbnb-bedrock/src/L1/ResourceMetering.sol";
 import {ICertManager} from "@nitro-validator/ICertManager.sol";
 
 import {stdJson} from "forge-std/StdJson.sol";
@@ -38,8 +35,8 @@ contract DeploySystem is Deploy {
         setupSuperchain();
         console.log("set up superchain!");
 
-        setupSystemConfigGlobal();
-        console.log("set up system config global!");
+        setupNitroEnclavesManager();
+        console.log("set up nitro Enclaves manager!");
 
         setupOpChain2();
         console.log("set up op chain!");
@@ -48,14 +45,14 @@ contract DeploySystem is Deploy {
         console.log("set chain deploy!");
     }
 
-    function setupSystemConfigGlobal() public {
-        console.log("Setting up SystemConfigGlobal");
+    function setupNitroEnclavesManager() public {
+        console.log("Setting up NitroEnclavesManager");
 
         checkCertManager();
 
-        deployERC1967Proxy("SystemConfigGlobalProxy");
-        deploySystemConfigGlobal();
-        initializeSystemConfigGlobal();
+        deployERC1967Proxy("NitroEnclavesManagerProxy");
+        deployNitroEnclavesManager();
+        initializeNitroEnclavesManager();
     }
 
     function setupOpChain2() public {
@@ -63,7 +60,7 @@ contract DeploySystem is Deploy {
 
         // Ensure that the requisite contracts are deployed
         mustGetAddress("SuperchainConfigProxy");
-        mustGetAddress("SystemConfigGlobalProxy");
+        mustGetAddress("NitroEnclavesManagerProxy");
         mustGetAddress("SystemOwnerSafe");
         mustGetAddress("AddressManager");
         mustGetAddress("ProxyAdmin");
@@ -172,19 +169,19 @@ contract DeploySystem is Deploy {
         checkSystemConfig({_contracts: contracts, _cfg: cfg, _isProxy: false});
     }
 
-    function deploySystemConfigGlobal()
+    function deployNitroEnclavesManager()
         public
         broadcast
         returns (address addr_)
     {
-        console.log("Deploying SystemConfigGlobal implementation");
+        console.log("Deploying NitroEnclavesManager implementation");
         addr_ = address(
-            new SystemConfigGlobal{salt: _implSalt()}(
+            new NitroEnclavesManager{salt: _implSalt()}(
                 ICertManager(mustGetAddress("CertManager"))
             )
         );
-        save("SystemConfigGlobal", addr_);
-        console.log("SystemConfigGlobal deployed at %s", addr_);
+        save("NitroEnclavesManager", addr_);
+        console.log("NitroEnclavesManager deployed at %s", addr_);
     }
 
     function deployPortal() public broadcast returns (address addr_) {
@@ -206,14 +203,13 @@ contract DeploySystem is Deploy {
     }
 
     function deployOutputOracle() public broadcast returns (address addr_) {
-        SystemConfigGlobal systemConfigGlobal = SystemConfigGlobal(
-            mustGetAddress("SystemConfigGlobalProxy")
+        NitroEnclavesManager nitroEnclavesManager = NitroEnclavesManager(
+            mustGetAddress("NitroEnclavesManagerProxy")
         );
 
         console.log("Deploying L2OutputOracle implementation");
-        OutputOracle oracle = new OutputOracle{salt: _implSalt()}(
-            systemConfigGlobal,
-            1000 // TODO move to config
+        L2OutputOracle oracle = new L2OutputOracle{salt: _implSalt()}(
+            nitroEnclavesManager
         );
 
         save("L2OutputOracle", address(oracle));
@@ -310,12 +306,12 @@ contract DeploySystem is Deploy {
         checkSystemConfig({_contracts: _proxies(), _cfg: cfg, _isProxy: true});
     }
 
-    function initializeSystemConfigGlobal() public broadcast {
-        console.log("Upgrading and initializing SystemConfigGlobal proxy");
-        address systemConfigGlobalProxy = mustGetAddress(
-            "SystemConfigGlobalProxy"
+    function initializeNitroEnclavesManager() public broadcast {
+        console.log("Upgrading and initializing NitroEnclavesManager proxy");
+        address nitroEnclavesManagerProxy = mustGetAddress(
+            "NitroEnclavesManagerProxy"
         );
-        address systemConfigGlobal = mustGetAddress("SystemConfigGlobal");
+        address nitroEnclavesManager = mustGetAddress("NitroEnclavesManager");
 
         string memory _json;
         string memory _path = Config.deployConfigPath();
@@ -327,23 +323,23 @@ contract DeploySystem is Deploy {
                 string.concat("Cannot find deploy config file at ", _path)
             );
         }
-        address systemConfigGlobalManager = stdJson.readAddress(
+        address nitroEnclavesManagerManager = stdJson.readAddress(
             _json,
-            "$.systemConfigGlobalManager"
+            "$.nitroEnclavesManagerManager"
         );
 
         _upgradeAndCallViaSafe({
-            _proxy: payable(systemConfigGlobalProxy),
-            _implementation: systemConfigGlobal,
+            _proxy: payable(nitroEnclavesManagerProxy),
+            _implementation: nitroEnclavesManager,
             _innerCallData: abi.encodeCall(
-                SystemConfigGlobal.initialize,
-                (cfg.finalSystemOwner(), systemConfigGlobalManager)
+                NitroEnclavesManager.initialize,
+                (cfg.finalSystemOwner(), nitroEnclavesManagerManager)
             )
         });
 
-        SystemConfigGlobal config = SystemConfigGlobal(systemConfigGlobalProxy);
+        NitroEnclavesManager config = NitroEnclavesManager(nitroEnclavesManagerProxy);
         string memory version = config.version();
-        console.log("SystemConfigGlobal version: %s", version);
+        console.log("NitroEnclavesManager version: %s", version);
     }
 
     function initializePortal() public broadcast {
@@ -360,9 +356,9 @@ contract DeploySystem is Deploy {
             _innerCallData: abi.encodeCall(
                 OptimismPortal.initialize,
                 (
-                    IL2OutputOracle(l2OutputOracleProxy),
-                    ISystemConfig(systemConfigProxy),
-                    ISuperchainConfig(superchainConfigProxy)
+                    L2OutputOracle(l2OutputOracleProxy),
+                    SystemConfig(systemConfigProxy),
+                    SuperchainConfig(superchainConfigProxy)
                 )
             )
         });
@@ -388,12 +384,12 @@ contract DeploySystem is Deploy {
             _proxy: payable(l2OutputOracleProxy),
             _implementation: l2OutputOracle,
             _innerCallData: abi.encodeCall(
-                OutputOracle.initialize,
+                L2OutputOracle.initialize,
                 (SystemConfigOwnable(systemConfigProxy), 0, 0, false)
             )
         });
 
-        OutputOracle oracle = OutputOracle(l2OutputOracleProxy);
+        L2OutputOracle oracle = L2OutputOracle(l2OutputOracleProxy);
         string memory version = oracle.version();
         console.log("L2OutputOracle version: %s", version);
 
@@ -410,7 +406,7 @@ contract DeploySystem is Deploy {
         bool _isProxy
     ) internal view {
         console.log("Running chain assertions on the L2OutputOracle");
-        OutputOracle oracle = OutputOracle(_contracts.L2OutputOracle);
+        L2OutputOracle oracle = L2OutputOracle(_contracts.L2OutputOracle);
 
         // Check that the contract is initialized
         ChainAssertions.assertSlotValueIsOne({
@@ -441,7 +437,7 @@ contract DeploySystem is Deploy {
             _offset: 0
         });
 
-        IResourceMetering.ResourceConfig memory resourceConfig = config
+        ResourceMetering.ResourceConfig memory resourceConfig = config
             .resourceConfig();
 
         if (_isProxy) {
@@ -456,7 +452,7 @@ contract DeploySystem is Deploy {
             require(config.unsafeBlockSigner() == _cfg.p2pSequencerAddress());
             require(config.scalar() >> 248 == 1);
             // Check _config
-            IResourceMetering.ResourceConfig memory rconfig = Constants
+            ResourceMetering.ResourceConfig memory rconfig = Constants
                 .DEFAULT_RESOURCE_CONFIG();
             require(
                 resourceConfig.maxResourceLimit == rconfig.maxResourceLimit

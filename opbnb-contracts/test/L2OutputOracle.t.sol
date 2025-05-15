@@ -3,26 +3,26 @@ pragma solidity ^0.8.15;
 
 import {Test, console} from "forge-std/Test.sol";
 import {ICertManager} from "@nitro-validator/ICertManager.sol";
-import {ProxyAdmin} from "@eth-optimism-bedrock/src/universal/ProxyAdmin.sol";
+import {ProxyAdmin} from "@opbnb-bedrock/src/universal/ProxyAdmin.sol";
 
 import "../src/ResolvingProxyFactory.sol";
-import "../src/SystemConfigGlobal.sol";
+import "../src/NitroEnclavesManager.sol";
 import "../src/SystemConfigOwnable.sol";
-import "../src/OutputOracle.sol";
+import "../src/L2OutputOracle.sol";
 
-contract OutputOracleTest is Test {
-    OutputOracle internal outputOracle;
+contract L2OutputOracleTest is Test {
+    L2OutputOracle internal l2OutputOracle;
 
     function setUp() public {
         ProxyAdmin admin = new ProxyAdmin(address(this));
-        SystemConfigGlobal scgImpl = new SystemConfigGlobal(ICertManager(address(0)));
-        SystemConfigGlobal scg =
-            SystemConfigGlobal(ResolvingProxyFactory.setupProxy(address(scgImpl), address(admin), 0x00));
+        NitroEnclavesManager scgImpl = new NitroEnclavesManager(ICertManager(address(0)));
+        NitroEnclavesManager scg =
+            NitroEnclavesManager(ResolvingProxyFactory.setupProxy(address(scgImpl), address(admin), 0x00));
         scg.initialize({_owner: address(this), _manager: address(this)});
         scg.setProposer(address(this));
-        OutputOracle outputOracleImpl = new OutputOracle({_systemConfigGlobal: scg, _maxOutputCount: 6});
-        outputOracle = OutputOracle(ResolvingProxyFactory.setupProxy(address(outputOracleImpl), address(admin), 0x00));
-        outputOracle.initialize({
+        L2OutputOracle outputOracleImpl = new L2OutputOracle({_systemConfigGlobal: scg, _maxOutputCount: 6});
+        l2OutputOracle = L2OutputOracle(ResolvingProxyFactory.setupProxy(address(outputOracleImpl), address(admin), 0x00));
+        l2OutputOracle.initialize({
             _systemConfig: SystemConfigOwnable(address(0)),
             _configHash: bytes32(0),
             _genesisOutputRoot: bytes32(0),

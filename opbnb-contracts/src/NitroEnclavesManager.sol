@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.15;
 
-import {OwnableManagedUpgradeable} from "../base/OwnableManagedUpgradeable.sol";
+import {OwnableManagedUpgradeable} from "./OwnableManagedUpgradeable.sol";
 import {ISemver} from "@opbnb-bedrock/src/universal/ISemver.sol";
 import {NitroValidator} from "@nitro-validator/NitroValidator.sol";
 import {LibBytes} from "@nitro-validator/LibBytes.sol";

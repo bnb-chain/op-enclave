@@ -3,7 +3,7 @@ pragma solidity 0.8.15;
 
 // Contracts
 import {Initializable} from "@openzeppelin/contracts/proxy/utils/Initializable.sol";
-import {ResourceMetering} from "@eth-optimism-bedrock/src/L1/ResourceMetering.sol";
+import {ResourceMetering} from "@opbnb-bedrock/src/L1/ResourceMetering.sol";
 import {L1Block} from "@opbnb-bedrock/src/L2/L1Block.sol";
 import {L2OutputOracle} from "./L2OutputOracle.sol";
 import {SystemConfig} from "@opbnb-bedrock/src/L1/SystemConfig.sol";

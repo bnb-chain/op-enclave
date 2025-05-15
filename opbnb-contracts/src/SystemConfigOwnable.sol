@@ -2,8 +2,8 @@
 pragma solidity 0.8.15;
 
 // Contracts
-import {OwnableConfig} from "../base/OwnableConfig.sol";
-import {OwnerConfig} from "../base/OwnerConfig.sol";
+import {OwnableConfig} from "./OwnableConfig.sol";
+import {OwnerConfig} from "./OwnerConfig.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {SystemConfig} from "@opbnb-bedrock/src/L1/SystemConfig.sol";
 import {OptimismPortal} from "@opbnb-bedrock/src/L1/OptimismPortal.sol";
@@ -11,7 +11,7 @@ import {ResourceMetering} from "@opbnb-bedrock/src/L1/ResourceMetering.sol";
 
 // Libraries
 import {Storage} from "@opbnb-bedrock/src/libraries/Storage.sol";
-import {Constants} from "@@opbnb-bedrock/src/libraries/Constants.sol";
+import {Constants} from "@opbnb-bedrock/src/libraries/Constants.sol";
 import {GasPayingToken, IGasToken} from "@opbnb-bedrock/src/libraries/GasPayingToken.sol";
 
 // interfaces

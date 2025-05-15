@@ -4,8 +4,8 @@ pragma solidity ^0.8.15;
 import {Vm} from "forge-std/Vm.sol";
 import {Test, console} from "forge-std/Test.sol";
 import {ResolvingProxyFactory} from "../src/ResolvingProxyFactory.sol";
-import {ProxyAdmin} from "@eth-optimism-bedrock/src/universal/ProxyAdmin.sol";
-import {Proxy} from "@eth-optimism-bedrock/src/universal/Proxy.sol";
+import {ProxyAdmin} from "@opbnb-bedrock/src/universal/ProxyAdmin.sol";
+import {Proxy} from "@opbnb-bedrock/src/universal/Proxy.sol";
 
 abstract contract Implementation {
     string internal value;

@@ -7,6 +7,8 @@ import {ISemver} from "@opbnb-bedrock/src/universal/ISemver.sol";
 import {Types} from "@opbnb-bedrock/src/libraries/Types.sol";
 import {Constants} from "@opbnb-bedrock/src/libraries/Constants.sol";
 
+import {NitroEnclavesManager} from "./NitroEnclavesManager.sol";
+
 /// @custom:proxied
 /// @title L2OutputOracle
 /// @notice The L2OutputOracle contains an array of L2 state outputs, where each output is a
@@ -18,6 +20,9 @@ contract L2OutputOracle is Initializable, ISemver {
 
     /// @notice Hash of the serialized chain configuration.
     bytes32 public configHash;
+
+    /// @notice Whether or not TEE proofs are enabled.
+    bool public proofsEnabled;
 
     /// @notice The number of the first L2 block recorded in this contract.
     uint256 public startingBlockNumber;
@@ -55,12 +60,6 @@ contract L2OutputOracle is Initializable, ISemver {
 
     /// @notice The L2 block number of Volta Hardfork.
     uint256 public constant voltaBlockNumber = 0;
-
-    /// @notice Hash of the serialized chain configuration.
-    bytes32 public configHash;
-
-    /// @notice Whether or not TEE proofs are enabled.
-    bool public proofsEnabled;
 
     /// @notice Emitted when an output is proposed.
     /// @param outputRoot    The output root.
@@ -224,12 +223,12 @@ contract L2OutputOracle is Initializable, ISemver {
             bytes32 _blockHash = blockhash(_l1BlockNumber);
             require(_blockHash != bytes32(0), "OutputOracle: blockhash not available");
 
-            bytes32 previousOutputRoot = l2Outputs[latestOutputIndex].outputRoot;
+            bytes32 previousOutputRoot = l2Outputs[l2Outputs.length - 1].outputRoot;
             address signer = ECDSA.recover(
                 keccak256(abi.encodePacked(configHash, _blockHash, _l2BlockNumber, previousOutputRoot, _outputRoot)),
                 _signature
             );
-            require(systemConfigGlobal.validSigners(signer), "OutputOracle: invalid signature");
+            require(nitroEnclavesManager.validSigners(signer), "OutputOracle: invalid signature");
         }
 
         emit OutputProposed(_outputRoot, nextOutputIndex(), _l2BlockNumber, block.timestamp);
