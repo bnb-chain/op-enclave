@@ -7,7 +7,7 @@ import {console2 as console} from "forge-std/console2.sol";
 
 contract L2GenesisDeploy is L2Genesis, Deployer {
     function generateForkAllocs() public {
-        console.log("Generate  fork allocs!");
+        console.log("Generate fork allocs!");
         runWithAllUpgrades();
     }
 }
