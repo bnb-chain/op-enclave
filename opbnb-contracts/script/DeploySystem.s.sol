@@ -27,10 +27,9 @@ import {console2 as console} from "forge-std/console2.sol";
 contract DeploySystem is Deploy {
     function deploy() public {
         console.log("start of L1 Deploy!");
+
         deploySafe("SystemOwnerSafe");
         console.log("deployed Safe!");
-
-        setupAdmin();
 
         setupSuperchain();
         console.log("set up superchain!");
@@ -40,16 +39,6 @@ contract DeploySystem is Deploy {
 
         setupOpChain2();
         console.log("set up op chain!");
-
-        setupChainDeploy();
-        console.log("set chain deploy!");
-    }
-
-    /// @notice Deploy the address manager and proxy admin contracts.
-    function setupAdmin() public {
-        deployAddressManager();
-        deployProxyAdmin();
-        transferProxyAdminOwnership();
     }
 
     function setupNitroEnclavesManager() public {
@@ -111,7 +100,7 @@ contract DeploySystem is Deploy {
         deployL1StandardBridge();
         deployL1ERC721Bridge();
         deployPortal();
-        deployOutputOracle();
+        deployL2OutputOracle();
     }
 
     function initializeImplementations2() public {
@@ -122,7 +111,7 @@ contract DeploySystem is Deploy {
         initializeL1ERC721Bridge();
         initializeOptimismMintableERC20Factory();
         initializeL1CrossDomainMessenger();
-        initializeOutputOracle();
+        initializeL2OutputOracle();
     }
 
     function checkCertManager() public {
@@ -182,7 +171,7 @@ contract DeploySystem is Deploy {
         ChainAssertions.checkOptimismPortal({_contracts: contracts, _cfg: cfg, _isProxy: false});
     }
 
-    function deployOutputOracle() public broadcast returns (address addr_) {
+    function deployL2OutputOracle() public broadcast returns (address addr_) {
         NitroEnclavesManager nitroEnclavesManager = NitroEnclavesManager(mustGetAddress("NitroEnclavesManagerProxy"));
 
         console.log("Deploying L2OutputOracle implementation");
@@ -319,8 +308,8 @@ contract DeploySystem is Deploy {
         ChainAssertions.checkOptimismPortal({_contracts: _proxies(), _cfg: cfg, _isProxy: true});
     }
 
-    function initializeOutputOracle() public broadcast {
-        console.log("Upgrading and initializing OutputOracle proxy");
+    function initializeL2OutputOracle() public broadcast {
+        console.log("Upgrading and initializing L2OutputOracle proxy");
         address l2OutputOracleProxy = mustGetAddress("L2OutputOracleProxy");
         address l2OutputOracle = mustGetAddress("L2OutputOracle");
 
