@@ -100,7 +100,7 @@ contract DeploySystem is Deploy {
         deployL1StandardBridge();
         deployL1ERC721Bridge();
         deployPortal();
-        deployL2OutputOracle();
+        deployNewL2OutputOracle();
     }
 
     function initializeImplementations2() public {
@@ -111,7 +111,7 @@ contract DeploySystem is Deploy {
         initializeL1ERC721Bridge();
         initializeOptimismMintableERC20Factory();
         initializeL1CrossDomainMessenger();
-        initializeL2OutputOracle();
+        initializeNewL2OutputOracle();
     }
 
     function checkCertManager() public {
@@ -171,7 +171,7 @@ contract DeploySystem is Deploy {
         ChainAssertions.checkOptimismPortal({_contracts: contracts, _cfg: cfg, _isProxy: false});
     }
 
-    function deployL2OutputOracle() public broadcast returns (address addr_) {
+    function deployNewL2OutputOracle() public broadcast returns (address addr_) {
         NitroEnclavesManager nitroEnclavesManager = NitroEnclavesManager(mustGetAddress("NitroEnclavesManagerProxy"));
 
         console.log("Deploying L2OutputOracle implementation");
@@ -308,7 +308,7 @@ contract DeploySystem is Deploy {
         ChainAssertions.checkOptimismPortal({_contracts: _proxies(), _cfg: cfg, _isProxy: true});
     }
 
-    function initializeL2OutputOracle() public broadcast {
+    function initializeNewL2OutputOracle() public broadcast {
         console.log("Upgrading and initializing L2OutputOracle proxy");
         address l2OutputOracleProxy = mustGetAddress("L2OutputOracleProxy");
         address l2OutputOracle = mustGetAddress("L2OutputOracle");
