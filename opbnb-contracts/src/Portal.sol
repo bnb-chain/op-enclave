@@ -56,7 +56,7 @@ contract Portal is Initializable, ResourceMetering, ISemver {
 
     /// @notice Contract of the L2OutputOracle.
     /// @custom:network-specific
-    L2OutputOracle public l2OutputOracle;
+    L2OutputOracle public l2Oracle;
 
     /// @notice Contract of the SystemConfig.
     /// @custom:network-specific
