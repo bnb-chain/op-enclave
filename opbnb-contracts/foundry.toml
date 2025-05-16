@@ -18,4 +18,5 @@ fs_permissions = [
     { access='read', path='./deploy-config/' },
     { access='read', path='./test/nitro-attestation/' },
     { access='read-write', path='./deployments/' },
+    { access='read', path = './out/' }
 ]
