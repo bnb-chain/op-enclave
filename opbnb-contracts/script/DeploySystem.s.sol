@@ -265,17 +265,6 @@ contract DeploySystem is Deploy {
         console.log("Upgrading and initializing NitroEnclavesManager proxy");
         address nitroEnclavesManagerProxy = mustGetAddress("NitroEnclavesManagerProxy");
         address nitroEnclavesManager = mustGetAddress("NitroEnclavesManager");
-
-        // string memory _json;
-        // string memory _path = Config.deployConfigPath();
-        // try vm.readFile(_path) returns (string memory data) {
-        //     _json = data;
-        // } catch {
-        //     require(false, string.concat("Cannot find deploy config file at ", _path));
-        // }
-        // address certManager = stdJson.readAddress(_json, "$.certManager");
-        // address certManager = getCertManagerAddress();
-        // save("CertManager", certManager);
         address certManager = mustGetAddress("CertManager");
 
         _upgradeAndCallViaSafe({
