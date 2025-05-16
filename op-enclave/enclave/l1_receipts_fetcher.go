@@ -120,3 +120,8 @@ func (h headerInfo) ParentBeaconRoot() *common.Hash {
 func (h headerInfo) HeaderRLP() ([]byte, error) {
 	return rlp.EncodeToBytes(h.Header)
 }
+
+// TODO: fix me
+func (h headerInfo) MillisecondTimestamp() uint64 {
+	return 0
+}
