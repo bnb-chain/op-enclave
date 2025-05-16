@@ -35,7 +35,7 @@ type Portal interface {
 	ProveAndFinalizeWithdrawalTransaction(opts *bind.TransactOpts, _tx bindings.TypesWithdrawalTransaction, _l2OutputIndex *big.Int, _outputRootProof bindings.TypesOutputRootProof, _withdrawalProof [][]byte) (*types.Transaction, error)
 }
 
-func WaitForOutputBlock(ctx context.Context, outputOracle *bindings.OutputOracle, blockNumber *big.Int, pollInterval time.Duration) (*big.Int, error) {
+func WaitForOutputBlock(ctx context.Context, outputOracle *bindings.L2OutputOracle, blockNumber *big.Int, pollInterval time.Duration) (*big.Int, error) {
 	for {
 		l2OutputBlock, err := outputOracle.LatestBlockNumber(&bind.CallOpts{})
 		if err != nil {

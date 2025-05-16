@@ -151,7 +151,7 @@ func ProveWithdrawal(ctx context.Context, l1, l2 *ethclient.Client, l2g *gethcli
 	if err != nil {
 		return nil, err
 	}
-	outputOracle, err := bindings.NewOutputOracle(outputOracleAddress, l1)
+	outputOracle, err := bindings.NewL2OutputOracle(outputOracleAddress, l1)
 	if err != nil {
 		return nil, err
 	}
