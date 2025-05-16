@@ -266,14 +266,15 @@ contract DeploySystem is Deploy {
         address nitroEnclavesManagerProxy = mustGetAddress("NitroEnclavesManagerProxy");
         address nitroEnclavesManager = mustGetAddress("NitroEnclavesManager");
 
-        string memory _json;
-        string memory _path = Config.deployConfigPath();
-        try vm.readFile(_path) returns (string memory data) {
-            _json = data;
-        } catch {
-            require(false, string.concat("Cannot find deploy config file at ", _path));
-        }
-        address certManager = stdJson.readAddress(_json, "$.certManager");
+        // string memory _json;
+        // string memory _path = Config.deployConfigPath();
+        // try vm.readFile(_path) returns (string memory data) {
+        //     _json = data;
+        // } catch {
+        //     require(false, string.concat("Cannot find deploy config file at ", _path));
+        // }
+        // address certManager = stdJson.readAddress(_json, "$.certManager");
+        address certManager = getCertManagerAddress();
 
         _upgradeAndCallViaSafe({
             _proxy: payable(nitroEnclavesManagerProxy),
@@ -346,10 +347,7 @@ contract DeploySystem is Deploy {
         checkL2OutputOracle({_contracts: _proxies(), _cfg: cfg, _isProxy: true});
     }
 
-    function checkL2OutputOracle(Types.ContractSet memory _contracts, DeployConfig _cfg, bool _isProxy)
-        internal
-        view
-    {
+    function checkL2OutputOracle(Types.ContractSet memory _contracts, DeployConfig _cfg, bool _isProxy) internal view {
         console.log("Running chain assertions on the L2OutputOracle");
         L2OutputOracle oracle = L2OutputOracle(_contracts.L2OutputOracle);
 
@@ -363,10 +361,7 @@ contract DeploySystem is Deploy {
         }
     }
 
-    function checkSystemConfig(Types.ContractSet memory _contracts, DeployConfig _cfg, bool _isProxy)
-        internal
-        view
-    {
+    function checkSystemConfig(Types.ContractSet memory _contracts, DeployConfig _cfg, bool _isProxy) internal view {
         console.log("Running chain assertions on the SystemConfig");
         SystemConfig config = SystemConfig(_contracts.SystemConfig);
 
@@ -428,5 +423,18 @@ contract DeploySystem is Deploy {
             require(config.optimismPortal() == address(0));
             require(config.optimismMintableERC20Factory() == address(0));
         }
+    }
+
+    function getCertManagerAddress() internal view returns (address addr_) {
+        string memory _path = vm.envOr("CERT_MANAGER_CONFIG_PATH", string(""));
+        require(bytes(_path).length > 0, "Config: must set CERT_MANAGER_CONFIG_PATH to filesystem path of deploy config");
+
+        string memory _json;
+        try vm.readFile(_path) returns (string memory data) {
+            _json = data;
+        } catch {
+            require(false, string.concat("Cannot find deploy config file at ", _path));
+        }
+        addr_ = stdJson.readAddress(_json, "$.certManager");
     }
 }
