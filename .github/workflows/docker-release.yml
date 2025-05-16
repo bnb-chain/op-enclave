@@ -11,7 +11,6 @@ on:
 jobs:
   push-op-enclave:
     runs-on: ubuntu-latest
- 
 
     steps:
       - uses: actions/checkout@v3
@@ -37,7 +36,6 @@ jobs:
             type=ref,event=tag
             type=semver,pattern={{version}}
             type=sha
-            type=raw,value=${{ github.event.inputs.tag }},enable=${{ github.event_name == 'workflow_dispatch' }}
             
       - name: Build and push
         uses: docker/build-push-action@v4
@@ -49,7 +47,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64,linux/arm64
           provenance: false
-          
+
   push-op-batcher:
     runs-on: ubuntu-latest
 
