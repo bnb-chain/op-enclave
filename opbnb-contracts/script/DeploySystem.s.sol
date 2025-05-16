@@ -274,7 +274,9 @@ contract DeploySystem is Deploy {
         //     require(false, string.concat("Cannot find deploy config file at ", _path));
         // }
         // address certManager = stdJson.readAddress(_json, "$.certManager");
-        address certManager = getCertManagerAddress();
+        // address certManager = getCertManagerAddress();
+        // save("CertManager", certManager);
+        address certManager = mustGetAddress("CertManager");
 
         _upgradeAndCallViaSafe({
             _proxy: payable(nitroEnclavesManagerProxy),
@@ -435,6 +437,6 @@ contract DeploySystem is Deploy {
         } catch {
             require(false, string.concat("Cannot find deploy config file at ", _path));
         }
-        addr_ = stdJson.readAddress(_json, "$.certManager");
+        addr_ = stdJson.readAddress(_json, "$.CertManager");
     }
 }
