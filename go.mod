@@ -37,9 +37,9 @@ require (
 	github.com/btcsuite/btcd/btcec/v2 v2.3.4 // indirect
 	github.com/btcsuite/btcd/btcutil v1.1.5 // indirect
 	github.com/btcsuite/btcd/chaincfg/chainhash v1.1.0 // indirect
+	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cockroachdb/errors v1.11.3 // indirect
-	github.com/cockroachdb/fifo v0.0.0-20240606204812-0bbfbd93a7ce // indirect
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
 	github.com/cockroachdb/pebble v1.1.4 // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
@@ -54,9 +54,12 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/deckarep/golang-set/v2 v2.6.0 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.3.0 // indirect
+	github.com/dgraph-io/ristretto v0.0.4-0.20210318174700-74754f61e018 // indirect
+	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/ethereum-optimism/go-ethereum-hdwallet v0.1.3 // indirect
 	github.com/ethereum-optimism/superchain-registry/superchain v0.0.0-20240603085035-9c8f6081266e // indirect
 	github.com/ethereum/c-kzg-4844 v1.0.0 // indirect
+	github.com/ferranbt/fastssz v0.0.0-20210905181407-59cf6761a7d5 // indirect
 	github.com/fjl/memsize v0.0.2 // indirect
 	github.com/fsnotify/fsnotify v1.8.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.2.0 // indirect
@@ -77,6 +80,7 @@ require (
 	github.com/gtank/merlin v0.1.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-bexpr v0.1.11 // indirect
+	github.com/hashicorp/golang-lru v0.5.5-0.20210104140557-80c98217689d // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/herumi/bls-eth-go-binary v0.0.0-20210917013441-d37c07cfda4e // indirect
 	github.com/hf/nsm v0.0.0-20220930140112-cd181bd646b9 // indirect
@@ -124,8 +128,10 @@ require (
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.62.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
+	github.com/prysmaticlabs/eth2-types v0.0.0-20210303084904-c9735a06829d // indirect
 	github.com/prysmaticlabs/fastssz v0.0.0-20221107182844-78142813af44 // indirect
 	github.com/prysmaticlabs/gohashtree v0.0.3-alpha // indirect
+	github.com/prysmaticlabs/prysm v0.0.0-20220124113610-e26cde5e091b // indirect
 	github.com/prysmaticlabs/prysm/v4 v4.2.0 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
@@ -169,10 +175,26 @@ require (
 
 replace github.com/base/op-enclave/op-enclave => ./op-enclave
 
-// replace github.com/ethereum/go-ethereum => github.com/ethereum-optimism/op-geth v1.101503.2
+// https://github.com/will-2012/op-geth/tree/stateless-poc-7, depend core.ExecuteWitness
+replace github.com/ethereum/go-ethereum => github.com/will-2012/op-geth v0.2.2-rc.1.0.20250516074726-e9caf091389c
 
-replace github.com/ethereum/go-ethereum => github.com/will-2012/op-geth v0.2.2-rc.1.0.20250514120633-67728ae1961f
+// https://github.com/bnb-chain/opbnb/tree/adapt_enclave import op-batcher/op-proposer
+replace github.com/ethereum-optimism/optimism => github.com/bnb-chain/opbnb v0.5.4-0.20250516033433-d1421717d681
 
-// replace github.com/ethereum-optimism/optimism => github.com/bnb-chain/opbnb v0.5.3-hotfix
+// fix verkle tree conflict
+replace github.com/crate-crypto/go-ipa => github.com/crate-crypto/go-ipa v0.0.0-20231205143816-408dbffb2041
 
-replace github.com/ethereum-optimism/optimism => ../opbnb
+// fix pebble conflict
+replace github.com/cockroachdb/pebble => github.com/cockroachdb/pebble v0.0.0-20230928194634-aa077af62593
+
+// fix btcd conflict
+replace github.com/cometbft/cometbft => github.com/bnb-chain/greenfield-cometbft v1.0.0
+
+replace github.com/btcsuite/btcd/btcec/v2 => github.com/btcsuite/btcd/btcec/v2 v2.2.0
+
+// fix 4844 conflict
+replace github.com/crate-crypto/go-kzg-4844 => github.com/crate-crypto/go-kzg-4844 v0.7.0
+
+replace github.com/ethereum/c-kzg-4844 => github.com/ethereum/c-kzg-4844 v0.4.0
+
+replace github.com/consensys/gnark-crypto => github.com/consensys/gnark-crypto v0.12.1
