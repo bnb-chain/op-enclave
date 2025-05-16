@@ -2,7 +2,8 @@
 pragma solidity ^0.8.15;
 
 import {Deploy} from "@opbnb-bedrock/scripts/Deploy.s.sol";
-import {DeployConfig} from "@opbnb-bedrock/scripts/DeployConfig.s.sol";
+import {Deployer} from "@opbnb-bedrock/scripts/Deployer.sol";
+// import {DeployConfig} from "@opbnb-bedrock/scripts/DeployConfig.s.sol";
 import {Config} from "@opbnb-bedrock/scripts/Config.sol";
 import {Types} from "@opbnb-bedrock/scripts/Types.sol";
 import {ChainAssertions} from "@opbnb-bedrock/scripts/ChainAssertions.sol";
@@ -17,6 +18,8 @@ import {OwnerConfig} from "../src/OwnerConfig.sol";
 import {SystemConfigOwnable} from "../src/SystemConfigOwnable.sol";
 import {NitroEnclavesManager} from "../src/NitroEnclavesManager.sol";
 import {DeployChain} from "../src/DeployChain.sol";
+import {EnclaveDeployConfig} from "./EnclaveDeployConfig.s.sol";
+import {EnclaveDeployer} from "./EnclaveDeployer.sol";
 import {Constants} from "@opbnb-bedrock/src/libraries/Constants.sol";
 import {ResourceMetering} from "@opbnb-bedrock/src/L1/ResourceMetering.sol";
 import {ICertManager} from "@nitro-validator/ICertManager.sol";
@@ -24,7 +27,12 @@ import {ICertManager} from "@nitro-validator/ICertManager.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {console2 as console} from "forge-std/console2.sol";
 
-contract DeploySystem is Deploy {
+contract DeploySystem is Deploy, EnclaveDeployer {
+    function setUp() public virtual override(Deployer, EnclaveDeployer) {
+        Deployer.setUp();
+        EnclaveDeployer.setUp();
+    }
+
     function deploy() public {
         console.log("start of L1 Deploy!");
 
@@ -134,7 +142,7 @@ contract DeploySystem is Deploy {
 
     function deploySystemConfigOwnable() public broadcast returns (address addr_) {
         console.log("Deploying OwnerConfig");
-        OwnerConfig ownerConfig = new OwnerConfig{salt: _implSalt()}(cfg.finalSystemOwner());
+        OwnerConfig ownerConfig = new OwnerConfig{salt: _implSalt()}(enclaveCfg.finalSystemOwner());
         save("OwnerConfig", address(ownerConfig));
 
         console.log("Deploying SystemConfig implementation");
@@ -147,7 +155,7 @@ contract DeploySystem is Deploy {
         // are always proxies.
         Types.ContractSet memory contracts = _proxiesUnstrict();
         contracts.SystemConfig = addr_;
-        checkSystemConfig({_contracts: contracts, _cfg: cfg, _isProxy: false});
+        checkSystemConfig({_contracts: contracts, _cfg: enclaveCfg, _isProxy: false});
     }
 
     function deployNitroEnclavesManager() public broadcast returns (address addr_) {
@@ -168,7 +176,7 @@ contract DeploySystem is Deploy {
         // are always proxies.
         Types.ContractSet memory contracts = _proxiesUnstrict();
         contracts.OptimismPortal = addr_;
-        ChainAssertions.checkOptimismPortal({_contracts: contracts, _cfg: cfg, _isProxy: false});
+        ChainAssertions.checkOptimismPortal({_contracts: contracts, _cfg: enclaveCfg, _isProxy: false});
     }
 
     function deployNewL2OutputOracle() public broadcast returns (address addr_) {
@@ -185,7 +193,7 @@ contract DeploySystem is Deploy {
         // are always proxies.
         Types.ContractSet memory contracts = _proxiesUnstrict();
         contracts.L2OutputOracle = address(oracle);
-        checkL2OutputOracle({_contracts: contracts, _cfg: cfg, _isProxy: false});
+        checkL2OutputOracle({_contracts: contracts, _cfg: enclaveCfg, _isProxy: false});
 
         addr_ = address(oracle);
     }
@@ -217,7 +225,7 @@ contract DeploySystem is Deploy {
         address systemConfigProxy = mustGetAddress("SystemConfigProxy");
         address systemConfig = mustGetAddress("SystemConfig");
 
-        bytes32 batcherHash = bytes32(uint256(uint160(cfg.batchSenderAddress())));
+        bytes32 batcherHash = bytes32(uint256(uint160(enclaveCfg.batchSenderAddress())));
 
         _upgradeAndCallViaSafe({
             _proxy: payable(systemConfigProxy),
@@ -225,13 +233,13 @@ contract DeploySystem is Deploy {
             _innerCallData: abi.encodeCall(
                 SystemConfigOwnable.initialize,
                 (
-                    cfg.basefeeScalar(),
-                    cfg.blobbasefeeScalar(),
+                    enclaveCfg.basefeeScalar(),
+                    enclaveCfg.blobbasefeeScalar(),
                     batcherHash,
-                    uint64(cfg.l2GenesisBlockGasLimit()),
-                    cfg.p2pSequencerAddress(),
+                    uint64(enclaveCfg.l2GenesisBlockGasLimit()),
+                    enclaveCfg.p2pSequencerAddress(),
                     Constants.DEFAULT_RESOURCE_CONFIG(),
-                    cfg.batchInboxAddress(),
+                    enclaveCfg.batchInboxAddress(),
                     address(0),
                     SystemConfig.Addresses({
                         l1CrossDomainMessenger: mustGetAddress("L1CrossDomainMessengerProxy"),
@@ -250,7 +258,7 @@ contract DeploySystem is Deploy {
         string memory version = config.version();
         console.log("SystemConfig version: %s", version);
 
-        checkSystemConfig({_contracts: _proxies(), _cfg: cfg, _isProxy: true});
+        checkSystemConfig({_contracts: _proxies(), _cfg: enclaveCfg, _isProxy: true});
     }
 
     function initializeNitroEnclavesManager() public broadcast {
@@ -265,14 +273,12 @@ contract DeploySystem is Deploy {
         } catch {
             require(false, string.concat("Cannot find deploy config file at ", _path));
         }
-        address nitroEnclavesManagerManager = stdJson.readAddress(_json, "$.nitroEnclavesManagerManager");
+        address certManager = stdJson.readAddress(_json, "$.certManager");
 
         _upgradeAndCallViaSafe({
             _proxy: payable(nitroEnclavesManagerProxy),
             _implementation: nitroEnclavesManager,
-            _innerCallData: abi.encodeCall(
-                NitroEnclavesManager.initialize, (cfg.finalSystemOwner(), nitroEnclavesManagerManager)
-            )
+            _innerCallData: abi.encodeCall(NitroEnclavesManager.initialize, (enclaveCfg.finalSystemOwner(), certManager))
         });
 
         NitroEnclavesManager config = NitroEnclavesManager(nitroEnclavesManagerProxy);
@@ -305,7 +311,7 @@ contract DeploySystem is Deploy {
         string memory version = portal.version();
         console.log("OptimismPortal version: %s", version);
 
-        ChainAssertions.checkOptimismPortal({_contracts: _proxies(), _cfg: cfg, _isProxy: true});
+        ChainAssertions.checkOptimismPortal({_contracts: _proxies(), _cfg: enclaveCfg, _isProxy: true});
     }
 
     function initializeNewL2OutputOracle() public broadcast {
@@ -319,13 +325,13 @@ contract DeploySystem is Deploy {
             _innerCallData: abi.encodeCall(
                 L2OutputOracle.initialize,
                 (
-                    cfg.l2OutputOracleSubmissionInterval(),
-                    cfg.l2BlockTime(),
-                    cfg.l2OutputOracleStartingBlockNumber(),
-                    cfg.l2OutputOracleStartingTimestamp(),
-                    cfg.l2OutputOracleProposer(),
-                    cfg.l2OutputOracleChallenger(),
-                    cfg.finalizationPeriodSeconds(),
+                    enclaveCfg.l2OutputOracleSubmissionInterval(),
+                    enclaveCfg.l2BlockTime(),
+                    enclaveCfg.l2OutputOracleStartingBlockNumber(),
+                    enclaveCfg.l2OutputOracleStartingTimestamp(),
+                    enclaveCfg.l2OutputOracleProposer(),
+                    enclaveCfg.l2OutputOracleChallenger(),
+                    enclaveCfg.finalizationPeriodSeconds(),
                     0,
                     0,
                     false
@@ -337,10 +343,13 @@ contract DeploySystem is Deploy {
         string memory version = oracle.version();
         console.log("L2OutputOracle version: %s", version);
 
-        checkL2OutputOracle({_contracts: _proxies(), _cfg: cfg, _isProxy: true});
+        checkL2OutputOracle({_contracts: _proxies(), _cfg: enclaveCfg, _isProxy: true});
     }
 
-    function checkL2OutputOracle(Types.ContractSet memory _contracts, DeployConfig _cfg, bool _isProxy) internal view {
+    function checkL2OutputOracle(Types.ContractSet memory _contracts, EnclaveDeployConfig _cfg, bool _isProxy)
+        internal
+        view
+    {
         console.log("Running chain assertions on the L2OutputOracle");
         L2OutputOracle oracle = L2OutputOracle(_contracts.L2OutputOracle);
 
@@ -354,7 +363,10 @@ contract DeploySystem is Deploy {
         }
     }
 
-    function checkSystemConfig(Types.ContractSet memory _contracts, DeployConfig _cfg, bool _isProxy) internal view {
+    function checkSystemConfig(Types.ContractSet memory _contracts, EnclaveDeployConfig _cfg, bool _isProxy)
+        internal
+        view
+    {
         console.log("Running chain assertions on the SystemConfig");
         SystemConfig config = SystemConfig(_contracts.SystemConfig);
 
