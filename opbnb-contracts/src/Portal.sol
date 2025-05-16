@@ -104,21 +104,21 @@ contract Portal is Initializable, ResourceMetering, ISemver {
     /// @notice Constructs the OptimismPortal contract.
     constructor() {
         initialize({
-            _l2OutputOracle: L2OutputOracle(address(0)),
+            _l2Oracle: L2OutputOracle(address(0)),
             _systemConfig: SystemConfig(address(0)),
             _superchainConfig: SuperchainConfig(address(0))
         });
     }
 
     /// @notice Initializer.
-    /// @param _l2OutputOracle Contract of the L2OutputOracle.
+    /// @param _l2Oracle Contract of the L2OutputOracle.
     /// @param _systemConfig Contract of the SystemConfig.
     /// @param _superchainConfig Contract of the SuperchainConfig.
-    function initialize(L2OutputOracle _l2OutputOracle, SystemConfig _systemConfig, SuperchainConfig _superchainConfig)
+    function initialize(L2OutputOracle _l2Oracle, SystemConfig _systemConfig, SuperchainConfig _superchainConfig)
         public
         initializer
     {
-        l2OutputOracle = _l2OutputOracle;
+        l2Oracle = _l2Oracle;
         systemConfig = _systemConfig;
         superchainConfig = _superchainConfig;
         if (l2Sender == address(0)) {
@@ -235,7 +235,7 @@ contract Portal is Initializable, ResourceMetering, ISemver {
 
         // Get the output root and load onto the stack to prevent multiple mloads. This will
         // revert if there is no output root for the given block number.
-        bytes32 outputRoot = l2OutputOracle.getL2Output(_l2OutputIndex).outputRoot;
+        bytes32 outputRoot = l2Oracle.getL2Output(_l2OutputIndex).outputRoot;
 
         // Verify that the output root can be generated with the elements in the proof.
         require(
@@ -494,7 +494,7 @@ contract Portal is Initializable, ResourceMetering, ISemver {
     /// @param _l2OutputIndex Index of the L2 output to check.
     /// @return Whether or not the output is finalized.
     function isOutputFinalized(uint256 _l2OutputIndex) external view returns (bool) {
-        return _isFinalizationPeriodElapsed(l2OutputOracle.getL2Output(_l2OutputIndex).timestamp);
+        return _isFinalizationPeriodElapsed(l2Oracle.getL2Output(_l2OutputIndex).timestamp);
     }
 
     /// @notice Determines whether the finalization period has elapsed with respect to
