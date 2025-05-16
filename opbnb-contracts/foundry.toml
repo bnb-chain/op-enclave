@@ -2,7 +2,7 @@
 
 [profile.default]
 src = "src"
-out = "forge-artifacts"
+out = "out"
 broadcast = "broadcast"
 libs = ["lib"]
 optimizer = true
@@ -18,5 +18,5 @@ fs_permissions = [
     { access='read', path='./deploy-config/' },
     { access='read', path='./test/nitro-attestation/' },
     { access='read-write', path='./deployments/' },
-    { access='read', path = './forge-artifacts/' }
+    { access='read', path = './out/' }
 ]

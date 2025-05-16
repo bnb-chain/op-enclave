@@ -3,10 +3,10 @@ guard-%:
 
 define abigen
 	echo "Generating bindings for $(1)"
-	cp contracts/out/$(1).sol/$(1).$(3).json contracts/out/$(1).sol/$(1).json 2>/dev/null || true
-	jq -r '.bytecode.object' contracts/out/$(1).sol/$(1).json > contracts/out/$(1).sol/$(1).bin
-	jq -r '.abi' contracts/out/$(1).sol/$(1).json > contracts/out/$(1).sol/$(1).abi
-	abigen --abi contracts/out/$(1).sol/$(1).abi --bin contracts/out/$(1).sol/$(1).bin --pkg bindings --type $(1) --out bindings/$(2).go
+	cp opbnb-contracts/out/$(1).sol/$(1).$(3).json opbnb-contracts/out/$(1).sol/$(1).json 2>/dev/null || true
+	jq -r '.bytecode.object' opbnb-contracts/out/$(1).sol/$(1).json > opbnb-contracts/out/$(1).sol/$(1).bin
+	jq -r '.abi' opbnb-contracts/out/$(1).sol/$(1).json > opbnb-contracts/out/$(1).sol/$(1).abi
+	abigen --abi opbnb-contracts/out/$(1).sol/$(1).abi --bin opbnb-contracts/out/$(1).sol/$(1).bin --pkg bindings --type $(1) --out bindings/$(2).go
 endef
 
 define verify
@@ -29,14 +29,13 @@ endef
 
 .PHONY: bindings
 bindings:
-	go install github.com/ethereum/go-ethereum/cmd/abigen@v1.14.11
-	cd contracts && forge build
+	cd opbnb-contracts && forge build
 	mkdir -p bindings
-	@$(call abigen,"OutputOracle","output_oracle","0.8.15")
+	@$(call abigen,"L2OutputOracle","l2_output_oracle","0.8.15")
 	@$(call abigen,"Portal","portal","0.8.15")
 	@$(call abigen,"DeployChain","deploy_chain","0.8.15")
 	@$(call abigen,"CertManager","cert_manager","0.8.15")
-	@$(call abigen,"SystemConfigGlobal","system_config_global","0.8.15")
+	@$(call abigen,"NitroEnclavesManager","nitro_enclaves_manager","0.8.15")
 	@$(call abigen,"GnosisSafe","gnosis_safe","0.8.15")
 
 .PHONY: deploy-cert-manager

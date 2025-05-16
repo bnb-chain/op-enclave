@@ -18,7 +18,6 @@ import {OwnerConfig} from "../src/OwnerConfig.sol";
 import {SystemConfigOwnable} from "../src/SystemConfigOwnable.sol";
 import {NitroEnclavesManager} from "../src/NitroEnclavesManager.sol";
 import {DeployChain} from "../src/DeployChain.sol";
-// import {EnclaveDeployConfig} from "./EnclaveDeployConfig.s.sol";
 import {EnclaveDeployer} from "./EnclaveDeployer.sol";
 import {Constants} from "@opbnb-bedrock/src/libraries/Constants.sol";
 import {ResourceMetering} from "@opbnb-bedrock/src/L1/ResourceMetering.sol";
@@ -28,11 +27,6 @@ import {stdJson} from "forge-std/StdJson.sol";
 import {console2 as console} from "forge-std/console2.sol";
 
 contract DeploySystem is Deploy {
-    // function setUp() public virtual override(Deployer, EnclaveDeployer) {
-    //     Deployer.setUp();
-    //     EnclaveDeployer.setUp();
-    // }
-
     function deploy() public {
         console.log("start of L1 Deploy!");
 
@@ -414,18 +408,5 @@ contract DeploySystem is Deploy {
             require(config.optimismPortal() == address(0));
             require(config.optimismMintableERC20Factory() == address(0));
         }
-    }
-
-    function getCertManagerAddress() internal view returns (address addr_) {
-        string memory _path = vm.envOr("CERT_MANAGER_CONFIG_PATH", string(""));
-        require(bytes(_path).length > 0, "Config: must set CERT_MANAGER_CONFIG_PATH to filesystem path of deploy config");
-
-        string memory _json;
-        try vm.readFile(_path) returns (string memory data) {
-            _json = data;
-        } catch {
-            require(false, string.concat("Cannot find deploy config file at ", _path));
-        }
-        addr_ = stdJson.readAddress(_json, "$.CertManager");
     }
 }

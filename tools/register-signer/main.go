@@ -26,7 +26,7 @@ func main() {
 	flag.StringVar(&attestationHex, "attestation", "", "attestation hex")
 	flag.StringVar(&rpcUrl, "rpc", "https://sepolia.base.org", "rpc url")
 	flag.StringVar(&privateKeyHex, "private-key", "", "private key")
-	flag.StringVar(&configAddress, "address", "", "address of the SystemConfigGlobal proxy contract")
+	flag.StringVar(&configAddress, "address", "", "address of the NitroEnclavesManager proxy contract")
 	flag.Parse()
 
 	if attestationHex == "" || privateKeyHex == "" || configAddress == "" {
@@ -71,7 +71,7 @@ func main() {
 		},
 	}
 
-	systemConfigGlobal, err := bindings.NewSystemConfigGlobal(common.HexToAddress(configAddress), client)
+	nitroEnclavesManager, err := bindings.NewNitroEnclavesManager(common.HexToAddress(configAddress), client)
 	if err != nil {
 		panic(err)
 	}
@@ -81,7 +81,7 @@ func main() {
 		panic(err)
 	}
 	signerAddr := crypto.PubkeyToAddress(*pub)
-	validSigner, err := systemConfigGlobal.ValidSigners(&bind.CallOpts{}, signerAddr)
+	validSigner, err := nitroEnclavesManager.ValidSigners(&bind.CallOpts{}, signerAddr)
 	if err != nil {
 		panic(err)
 	}
@@ -93,7 +93,7 @@ func main() {
 		fmt.Printf("Registering signer: %s\n", signerAddr.String())
 	}
 
-	certManagerAddr, err := systemConfigGlobal.CertManager(&bind.CallOpts{})
+	certManagerAddr, err := nitroEnclavesManager.CertManager(&bind.CallOpts{})
 	if err != nil {
 		panic(err)
 	}
@@ -137,12 +137,12 @@ func main() {
 	verifyCert(res.Document.Certificate, false, parentCertHash)
 
 	pcr0Hash := crypto.Keccak256Hash(res.Document.PCRs[0])
-	valid, err := systemConfigGlobal.ValidPCR0s(&bind.CallOpts{}, pcr0Hash)
+	valid, err := nitroEnclavesManager.ValidPCR0s(&bind.CallOpts{}, pcr0Hash)
 	if err != nil {
 		panic(err)
 	}
 	if !valid {
-		tx, err := systemConfigGlobal.RegisterPCR0(auth, res.Document.PCRs[0])
+		tx, err := nitroEnclavesManager.RegisterPCR0(auth, res.Document.PCRs[0])
 		if err != nil {
 			panic(err)
 		}
@@ -155,7 +155,7 @@ func main() {
 		fmt.Printf("PCR0 already registered: %s\n", pcr0Hash.String())
 	}
 
-	tx, err := systemConfigGlobal.RegisterSigner(auth, res.COSESign1, res.Signature)
+	tx, err := nitroEnclavesManager.RegisterSigner(auth, res.COSESign1, res.Signature)
 	if err != nil {
 		panic(err)
 	}
