@@ -57,7 +57,7 @@ contract InitializeOutputOracle is Deploy {
         console.log("L2OutputOracle version: %s", version);
 
         checkL2OutputOracle({
-            _contracts: _proxies(),
+            _oracle: address(oracle),
             _cfg: cfg,
             _isProxy: true
         });
@@ -93,12 +93,12 @@ contract InitializeOutputOracle is Deploy {
     }
 
     function checkL2OutputOracle(
-        Types.ContractSet memory _contracts,
+        address _oracle,
         DeployConfig _cfg,
         bool _isProxy
     ) internal view {
         console.log("Running chain assertions on the L2OutputOracle");
-        L2OutputOracle oracle = L2OutputOracle(_contracts.L2OutputOracle);
+        L2OutputOracle oracle = L2OutputOracle(_oracle);
 
         // Check that the contract is initialized
         ChainAssertions.assertSlotValueIsOne({
