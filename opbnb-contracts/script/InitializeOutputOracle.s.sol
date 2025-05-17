@@ -5,11 +5,12 @@ import {stdJson} from "forge-std/StdJson.sol";
 import {console2 as console} from "forge-std/console2.sol";
 
 import {Hashing} from "@opbnb-bedrock/src/libraries/Hashing.sol";
+import {Types as Types2} from "@opbnb-bedrock/src/libraries/Types.sol";
 import {ChainAssertions} from "@opbnb-bedrock/scripts/ChainAssertions.sol";
+import {Config} from "@opbnb-bedrock/scripts/Config.sol";
 import {Deploy} from "@opbnb-bedrock/scripts/Deploy.s.sol";
 import {DeployConfig} from "@opbnb-bedrock/scripts/DeployConfig.s.sol";
 import {Types} from "@opbnb-bedrock/scripts/Types.sol";
-import {Types as Types2} from "@opbnb-bedrock/src/libraries/Types.sol";
 
 import {L2OutputOracle} from "../src/L2OutputOracle.sol";
 
@@ -22,16 +23,15 @@ contract InitializeOutputOracle is Deploy {
     bytes32 public constant MESSAGE_PASSER_STORAGE_HASH =
         0x8ed4baae3a927be3dea54996b4d5899f8c01e7594bf50b17dc1e741388ce3d12;
 
-    function initialize(address _owner) external {
-        // do nothing
-    }
-
-    /// The initialization of the L2OutputOracle proxy depends on the L2 chain's config:
+    /// The initialization of the L2OutputOracle proxy
     function initializeNewL2OutputOracle() public broadcast {
+        getAndSaveAddresses();
+
         console.log("Upgrading and initializing L2OutputOracle proxy");
         address l2OutputOracleProxy = mustGetAddress("L2OutputOracleProxy");
         address l2OutputOracle = mustGetAddress("L2OutputOracle");
 
+        Hashes memory hashes = calculateHashes();
         _upgradeAndCallViaSafe({
             _proxy: payable(l2OutputOracleProxy),
             _implementation: l2OutputOracle,
@@ -45,9 +45,9 @@ contract InitializeOutputOracle is Deploy {
                     cfg.l2OutputOracleProposer(),
                     cfg.l2OutputOracleChallenger(),
                     cfg.finalizationPeriodSeconds(),
-                    0,
-                    0,
-                    false
+                    hashes.configHash,
+                    hashes.genesisOutputRoot,
+                    true
                 )
             )
         });
@@ -61,6 +61,35 @@ contract InitializeOutputOracle is Deploy {
             _cfg: cfg,
             _isProxy: true
         });
+    }
+
+    function getAndSaveAddresses() internal {
+        string memory _path = Config.deploymentOutfile();
+        string memory _json;
+
+        try vm.readFile(_path) returns (string memory data) {
+            _json = data;
+        } catch {
+            require(
+                false,
+                string.concat("Cannot find rollup config file at ", _path)
+            );
+        }
+
+        address l2OutputOracleProxy = stdJson.readAddress(
+            _json,
+            "$.L2OutputOracleProxy"
+        );
+        save("L2OutputOracleProxy", l2OutputOracleProxy);
+
+        address l2OutputOracle = stdJson.readAddress(_json, "$.L2OutputOracle");
+        save("L2OutputOracle", l2OutputOracle);
+
+        address proxyAdmin = stdJson.readAddress(_json, "$.ProxyAdmin");
+        save("ProxyAdmin", proxyAdmin);
+
+        address safe = stdJson.readAddress(_json, "$.SystemOwnerSafe");
+        save("SystemOwnerSafe", safe);
     }
 
     function checkL2OutputOracle(
@@ -85,7 +114,7 @@ contract InitializeOutputOracle is Deploy {
         }
     }
 
-    function calculateHashes() public view returns (Hashes memory) {
+    function calculateHashes() internal view returns (Hashes memory) {
         string memory _json;
 
         string memory _path = vm.envOr("ROLLUP_CONFIG_PATH", string(""));
@@ -107,7 +136,7 @@ contract InitializeOutputOracle is Deploy {
         uint256 l2ChainID = stdJson.readUint(_json, "$.l2_chain_id");
         uint256 genesisL1Hash = stdJson.readUint(_json, "$.genesis.l1.hash");
         bytes32 genesisL2Hash = stdJson.readBytes32(_json, "$.genesis.l2.hash");
-        uint64 l2Time = uint64(uint256(stdJson.readUint(_json, "$.genesis.l2_time")));
+        uint64 l2Time = uint64(stdJson.readUint(_json, "$.genesis.l2_time"));
         address batcherAddr = stdJson.readAddress(
             _json,
             "$.genesis.system_config.batcherAddr"
@@ -116,9 +145,8 @@ contract InitializeOutputOracle is Deploy {
             _json,
             "$.genesis.system_config.scalar"
         );
-        bytes32 gasLimit = stdJson.readBytes32(
-            _json,
-            "$.genesis.system_config.gasLimit"
+        uint64 gasLimit = uint64(
+            stdJson.readUint(_json, "$.genesis.system_config.gasLimit")
         );
         address depositContractAddr = stdJson.readAddress(
             _json,
