@@ -113,7 +113,7 @@ contract DeploySystem is Deploy {
         initializeL1ERC721Bridge();
         initializeOptimismMintableERC20Factory();
         initializeL1CrossDomainMessenger();
-        initializeNewL2OutputOracle();
+        // initializeNewL2OutputOracle();
     }
 
     function checkCertManager() public {
