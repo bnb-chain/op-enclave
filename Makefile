@@ -29,6 +29,7 @@ endef
 
 .PHONY: bindings
 bindings:
+	go install github.com/ethereum/go-ethereum/cmd/abigen@latest
 	cd opbnb-contracts && forge build
 	mkdir -p bindings
 	@$(call abigen,"L2OutputOracle","l2_output_oracle","0.8.15")
