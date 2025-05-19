@@ -56,11 +56,7 @@ contract InitializeOutputOracle is Deploy {
         string memory version = oracle.version();
         console.log("L2OutputOracle version: %s", version);
 
-        checkL2OutputOracle({
-            _oracle: address(oracle),
-            _cfg: cfg,
-            _isProxy: true
-        });
+        checkL2OutputOracle({_oracle: address(oracle), _cfg: cfg, _isProxy: true});
     }
 
     function getAndSaveAddresses() internal {
@@ -70,16 +66,10 @@ contract InitializeOutputOracle is Deploy {
         try vm.readFile(_path) returns (string memory data) {
             _json = data;
         } catch {
-            require(
-                false,
-                string.concat("Cannot find rollup config file at ", _path)
-            );
+            require(false, string.concat("Cannot find deployment file at ", _path));
         }
 
-        address l2OutputOracleProxy = stdJson.readAddress(
-            _json,
-            "$.L2OutputOracleProxy"
-        );
+        address l2OutputOracleProxy = stdJson.readAddress(_json, "$.L2OutputOracleProxy");
         save("L2OutputOracleProxy", l2OutputOracleProxy);
 
         address l2OutputOracle = stdJson.readAddress(_json, "$.L2OutputOracle");
@@ -92,20 +82,12 @@ contract InitializeOutputOracle is Deploy {
         save("SystemOwnerSafe", safe);
     }
 
-    function checkL2OutputOracle(
-        address _oracle,
-        DeployConfig _cfg,
-        bool _isProxy
-    ) internal view {
+    function checkL2OutputOracle(address _oracle, DeployConfig _cfg, bool _isProxy) internal view {
         console.log("Running chain assertions on the L2OutputOracle");
         L2OutputOracle oracle = L2OutputOracle(_oracle);
 
         // Check that the contract is initialized
-        ChainAssertions.assertSlotValueIsOne({
-            _contractAddress: address(oracle),
-            _slot: 0,
-            _offset: 0
-        });
+        ChainAssertions.assertSlotValueIsOne({_contractAddress: address(oracle), _slot: 0, _offset: 0});
 
         if (_isProxy) {
             require(oracle.proposer() == _cfg.l2OutputOracleProposer());
@@ -118,44 +100,24 @@ contract InitializeOutputOracle is Deploy {
         string memory _json;
 
         string memory _path = vm.envOr("ROLLUP_CONFIG_PATH", string(""));
-        require(
-            bytes(_path).length > 0,
-            "Config: must set ROLLUP_CONFIG_PATH to filesystem path of rollup config"
-        );
+        require(bytes(_path).length > 0, "Config: must set ROLLUP_CONFIG_PATH to filesystem path of rollup config");
 
         console.log("Rollup config: reading file %s", _path);
         try vm.readFile(_path) returns (string memory data) {
             _json = data;
         } catch {
-            require(
-                false,
-                string.concat("Cannot find rollup config file at ", _path)
-            );
+            require(false, string.concat("Cannot find rollup config file at ", _path));
         }
 
         uint256 l2ChainID = stdJson.readUint(_json, "$.l2_chain_id");
         uint256 genesisL1Hash = stdJson.readUint(_json, "$.genesis.l1.hash");
         bytes32 genesisL2Hash = stdJson.readBytes32(_json, "$.genesis.l2.hash");
         uint64 l2Time = uint64(stdJson.readUint(_json, "$.genesis.l2_time"));
-        address batcherAddr = stdJson.readAddress(
-            _json,
-            "$.genesis.system_config.batcherAddr"
-        );
-        bytes32 scalar = stdJson.readBytes32(
-            _json,
-            "$.genesis.system_config.scalar"
-        );
-        uint64 gasLimit = uint64(
-            stdJson.readUint(_json, "$.genesis.system_config.gasLimit")
-        );
-        address depositContractAddr = stdJson.readAddress(
-            _json,
-            "$.deposit_contract_address"
-        );
-        address l1SystemConfigAddr = stdJson.readAddress(
-            _json,
-            "$.l1_system_config_address"
-        );
+        address batcherAddr = stdJson.readAddress(_json, "$.genesis.system_config.batcherAddr");
+        bytes32 scalar = stdJson.readBytes32(_json, "$.genesis.system_config.scalar");
+        uint64 gasLimit = uint64(stdJson.readUint(_json, "$.genesis.system_config.gasLimit"));
+        address depositContractAddr = stdJson.readAddress(_json, "$.deposit_contract_address");
+        address l1SystemConfigAddr = stdJson.readAddress(_json, "$.l1_system_config_address");
 
         bytes32 configHash = keccak256(
             abi.encodePacked(
@@ -182,10 +144,6 @@ contract InitializeOutputOracle is Deploy {
             })
         );
 
-        return
-            Hashes({
-                configHash: configHash,
-                genesisOutputRoot: genesisOutputRoot
-            });
+        return Hashes({configHash: configHash, genesisOutputRoot: genesisOutputRoot});
     }
 }
