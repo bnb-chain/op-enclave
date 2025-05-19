@@ -54,6 +54,9 @@ func createAWSNitroRoot() *x509.CertPool {
 		panic("DefaultCARoots checksum failed")
 	}
 	reader, err := zip.NewReader(bytes.NewReader(roots), int64(len(roots)))
+	if err != nil {
+		panic("error new reading AWS root cert zip")
+	}
 	ca, err := reader.File[0].Open()
 	if err != nil {
 		panic("error reading AWS root cert zip")
@@ -286,9 +289,6 @@ func (s *Server) ExecuteStateless(
 		return nil, fmt.Errorf("failed to sign: %w", err)
 	}
 
-	if err != nil {
-		return nil, err
-	}
 	return &Proposal{
 		OutputRoot:    outputRoot,
 		Signature:     sig,
