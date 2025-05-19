@@ -3,7 +3,6 @@ pragma solidity 0.8.15;
 
 import {Script} from "forge-std/Script.sol";
 import {console2 as console} from "forge-std/console2.sol";
-import {DeployChain} from "../src/DeployChain.sol";
 import {Artifacts} from "@opbnb-bedrock/scripts/Artifacts.s.sol";
 import {ProxyAdmin} from "@opbnb-bedrock/src/universal/ProxyAdmin.sol";
 import {NitroEnclavesManager} from "../src/NitroEnclavesManager.sol";

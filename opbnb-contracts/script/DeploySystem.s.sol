@@ -17,7 +17,6 @@ import {L2OutputOracle} from "../src/L2OutputOracle.sol";
 import {OwnerConfig} from "../src/OwnerConfig.sol";
 import {SystemConfigOwnable} from "../src/SystemConfigOwnable.sol";
 import {NitroEnclavesManager} from "../src/NitroEnclavesManager.sol";
-import {DeployChain} from "../src/DeployChain.sol";
 import {EnclaveDeployer} from "./EnclaveDeployer.sol";
 import {Constants} from "@opbnb-bedrock/src/libraries/Constants.sol";
 import {ResourceMetering} from "@opbnb-bedrock/src/L1/ResourceMetering.sol";
@@ -66,12 +65,6 @@ contract DeploySystem is Deploy {
         deployProxies2();
         deployImplementations2();
         initializeImplementations2();
-    }
-
-    function setupChainDeploy() public {
-        console.log("Setting up Chain Deploy");
-
-        deployDeployChain();
     }
 
     function deployProxies2() public {
@@ -190,28 +183,6 @@ contract DeploySystem is Deploy {
         checkL2OutputOracle({_contracts: contracts, _cfg: cfg, _isProxy: false});
 
         addr_ = address(oracle);
-    }
-
-    function deployDeployChain() public broadcast returns (address addr_) {
-        console.log("Deploying DeployChain implementation");
-        DeployChain deployChain = new DeployChain{salt: _implSalt()}({
-            _owner: tx.origin,
-            _proxyAdmin: mustGetAddress("ProxyAdmin"),
-            _optimismPortal: mustGetAddress("OptimismPortalProxy"),
-            _systemConfig: mustGetAddress("SystemConfigProxy"),
-            _l1StandardBridge: mustGetAddress("L1StandardBridgeProxy"),
-            _l1ERC721Bridge: mustGetAddress("L1ERC721BridgeProxy"),
-            _optimismMintableERC20Factory: mustGetAddress("OptimismMintableERC20FactoryProxy"),
-            _l1CrossDomainMessenger: mustGetAddress("L1CrossDomainMessengerProxy"),
-            _l2OutputOracle: mustGetAddress("L2OutputOracleProxy"),
-            _superchainConfig: mustGetAddress("SuperchainConfigProxy"),
-            _protocolVersions: mustGetAddress("ProtocolVersionsProxy")
-        });
-
-        save("DeployChain", address(deployChain));
-        console.log("DeployChain deployed at %s", address(deployChain));
-
-        addr_ = address(deployChain);
     }
 
     function initializeSystemConfigOwnable() public broadcast {

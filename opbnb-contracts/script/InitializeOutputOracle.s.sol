@@ -118,6 +118,7 @@ contract InitializeOutputOracle is Deploy {
         uint64 gasLimit = uint64(stdJson.readUint(_json, "$.genesis.system_config.gasLimit"));
         address depositContractAddr = stdJson.readAddress(_json, "$.deposit_contract_address");
         address l1SystemConfigAddr = stdJson.readAddress(_json, "$.l1_system_config_address");
+        bytes32 l2GenesisStateRoot = stdJson.readBytes32(_json, "$.l2_genesis_state_root");
 
         bytes32 configHash = keccak256(
             abi.encodePacked(
@@ -134,11 +135,10 @@ contract InitializeOutputOracle is Deploy {
             )
         );
 
-        bytes32 l2GenegsisStateRoot = vm.envBytes32("GENESIS_STATE_ROOT");
         bytes32 genesisOutputRoot = Hashing.hashOutputRootProof(
             Types2.OutputRootProof({
                 version: 0,
-                stateRoot: l2GenegsisStateRoot,
+                stateRoot: l2GenesisStateRoot,
                 messagePasserStorageRoot: MESSAGE_PASSER_STORAGE_HASH,
                 latestBlockhash: genesisL2Hash
             })
