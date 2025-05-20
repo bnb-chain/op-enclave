@@ -15,7 +15,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=0 go build -o bin/enclave ./cmd/enclave
+RUN go build -o bin/enclave ./cmd/enclave
 
 COPY eif eif/
 COPY --from=bootstrap /build/out bootstrap
