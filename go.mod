@@ -175,11 +175,11 @@ require (
 
 replace github.com/base/op-enclave/op-enclave => ./op-enclave
 
-// https://github.com/bnb-chain/op-geth/tree/tmp_7702_witness, depend core.ExecuteWitness
-replace github.com/ethereum/go-ethereum => github.com/bnb-chain/op-geth v1.101315.2-0.0.20250516112649-809fafe48823
+// https://github.com/bnb-chain/op-geth/tree/tee-base-stateless-poc, depend core.ExecuteWitness
+replace github.com/ethereum/go-ethereum => github.com/bnb-chain/op-geth v1.101315.2-0.0.20250520053659-1fde7613d115
 
 // https://github.com/bnb-chain/opbnb/tree/adapt_enclave import op-batcher/op-proposer
-replace github.com/ethereum-optimism/optimism => github.com/bnb-chain/opbnb v0.5.4-0.20250516033433-d1421717d681
+replace github.com/ethereum-optimism/optimism => github.com/bnb-chain/opbnb v0.5.4-0.20250520064121-9c9dabcd4645
 
 // fix verkle tree conflict
 replace github.com/crate-crypto/go-ipa => github.com/crate-crypto/go-ipa v0.0.0-20231205143816-408dbffb2041
