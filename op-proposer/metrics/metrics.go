@@ -46,6 +46,7 @@ func NewMetrics(procName string) *Metrics {
 
 	registry := opmetrics.NewRegistry()
 	factory := opmetrics.With(registry)
+	txMetrics := txmetrics.MakeTxMetrics(ns, factory)
 
 	return &Metrics{
 		ns:       ns,
@@ -53,8 +54,8 @@ func NewMetrics(procName string) *Metrics {
 		factory:  factory,
 
 		RefMetrics: opmetrics.MakeRefMetrics(ns, factory),
-		TxMetrics:  txmetrics.MakeTxMetrics(ns, factory),
-		RPCMetrics: opmetrics.MakeRPCMetrics(ns, factory),
+		TxMetrics:  txMetrics,
+		RPCMetrics: txMetrics.RPCMetrics,
 
 		info: *factory.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: ns,
