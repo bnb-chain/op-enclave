@@ -272,9 +272,8 @@ func (s *Server) ExecuteStateless(
 	l1OriginHash := l1Origin.Hash()
 	previousBlockHeader := w.Headers[0]
 
-	log.Warn("debug witness, ExecuteStateless",
+	log.Warn("debug witness, ExecuteStateless in tee",
 		"l1Origin_block", l1Origin,
-		"l1Origin_header", l1Origin.Header(),
 		"l1OriginHash", l1OriginHash,
 		"previousBlockHeader", previousBlockHeader,
 		"blockHeader", blockHeader)
