@@ -1,30 +1,32 @@
-# github.com/mdehoog/aws-nitro-enclaves-sdk-bootstrap
 FROM ghcr.io/mdehoog/aws-nitro-enclaves-sdk-bootstrap@sha256:6e5e53bd47370dbc1920208e93d222533a36f9f5dc85615591cbfe56a03312b0 AS bootstrap
 
 
-# golang:1.22.6
-FROM golang@sha256:367bb5295d3103981a86a572651d8297d6973f2ec8b62f716b007860e22cbc25 AS builder
+FROM golang:1.22-alpine AS builder
 
-RUN go install github.com/linuxkit/linuxkit/src/cmd/linuxkit@270fd1c5aa1986977b31af6c743c6a2681f67a29
+RUN apk add --no-cache musl-dev gcc g++ make
 
 WORKDIR /build
-RUN mkdir -p /build
 
 COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
 
-RUN go build -o bin/enclave ./cmd/enclave
+ENV CGO_ENABLED=1
+ENV GOOS=linux
+ENV GOARCH=amd64
+
+RUN go build -ldflags="-linkmode external -extldflags -static" -o bin/enclave ./cmd/enclave
 
 COPY eif eif/
 COPY --from=bootstrap /build/out bootstrap
+
+RUN go install github.com/linuxkit/linuxkit/src/cmd/linuxkit@270fd1c5aa1986977b31af6c743c6a2681f67a29
 RUN linuxkit build --format kernel+initrd --no-sbom --name init-ramdisk ./eif/init-ramdisk.yaml
 RUN linuxkit build --format kernel+initrd --no-sbom --name user-ramdisk ./eif/user-ramdisk.yaml
 
 
-# rust:1.80.1
-FROM rust@sha256:29fe4376919e25b7587a1063d7b521d9db735fc137d3cf30ae41eb326d209471 AS eif
+FROM rust:1.80.1 AS eif
 
 RUN mkdir /build
 WORKDIR /build
