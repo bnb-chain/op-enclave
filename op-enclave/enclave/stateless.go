@@ -32,7 +32,7 @@ func ExecuteStateless(
 ) error {
 	l1OriginHash := l1Origin.Hash()
 	computed := types.DeriveSha(l1Receipts, trie.NewStackTrie(nil))
-	if computed != l1Origin.Header().ReceiptHash {
+	if computed != l1Origin.Header().ReceiptHash { // todo: panic here?
 		return errors.New("invalid receipts")
 	}
 
