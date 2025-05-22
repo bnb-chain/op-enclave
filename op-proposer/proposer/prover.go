@@ -159,8 +159,10 @@ func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, e
 	log.Info("debug witness, execute enclave state transition",
 		"l2_block_number", block.Number(),
 		"l2_block_hash", block.Hash(),
-		"l1_origin_block", l1Origin.value,
-		"witness", witness.value)
+		"l1_origin_block", l1Origin.value)
+	if l1Origin.value.Header() == nil {
+		panic(fmt.Sprintf("%v l1Origin.value.Header() is nil", l1Origin.value))
+	}
 	output, err := o.enclave.ExecuteStateless(
 		ctx,
 		o.config,
