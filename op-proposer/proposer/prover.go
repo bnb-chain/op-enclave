@@ -2,6 +2,7 @@ package proposer
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/base/op-enclave/op-enclave/enclave"
@@ -162,6 +163,18 @@ func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, e
 		"l1_origin_block", l1Origin.value)
 	if l1Origin.value.Header() == nil {
 		panic(fmt.Sprintf("%v l1Origin.value.Header() is nil", l1Origin.value))
+	} else {
+		// check
+		buf, checkErr := json.Marshal(l1Origin.value)
+		if checkErr != nil {
+			panic(fmt.Sprintf("%v json marshal failed %v", l1Origin.value, checkErr))
+		}
+		var newBlock types.Block
+		checkErr = json.Unmarshal(buf, &newBlock)
+		if checkErr != nil {
+			panic(fmt.Sprintf("%v json unmarshal failed %v", l1Origin.value, checkErr))
+		}
+		log.Info("debug witness, print old and new", "old", l1Origin.value, "new", newBlock)
 	}
 	output, err := o.enclave.ExecuteStateless(
 		ctx,
