@@ -275,6 +275,7 @@ func (s *Server) ExecuteStateless(
 	err = ExecuteStateless(ctx, config.ChainConfig, config.ToRollupConfig(),
 		l1Origin, l1Receipts, previousBlockTxs, blockHeader, sequencedTxs, w, messageAccount)
 	if err != nil {
+		log.Info("debug witness, failed to execute Stateless ", "error", err)
 		return nil, err
 	}
 
