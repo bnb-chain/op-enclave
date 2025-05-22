@@ -272,6 +272,12 @@ func (s *Server) ExecuteStateless(
 	l1OriginHash := l1Origin.Hash()
 	previousBlockHeader := w.Headers[0]
 
+	log.Info("debug witness, ExecuteStateless",
+		"l1Origin_block", l1Origin,
+		"l1Origin_header", l1Origin.Header(),
+		"l1OriginHash", l1OriginHash,
+		"previousBlockHeader", previousBlockHeader,
+		"blockHeader", blockHeader)
 	err = ExecuteStateless(ctx, config.ChainConfig, config.ToRollupConfig(),
 		l1Origin, l1Receipts, previousBlockTxs, blockHeader, sequencedTxs, w, messageAccount)
 	if err != nil {

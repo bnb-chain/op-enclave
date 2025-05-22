@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/stateless"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rpc"
 )
@@ -128,10 +129,17 @@ func (e *ethClient) BlockByNumber(ctx context.Context, number *big.Int) (*types.
 }
 
 func (e *ethClient) BlockByHash(ctx context.Context, hash common.Hash) (*types.Block, error) {
+	var (
+		block *types.Block
+		err   error
+	)
+	defer func() {
+		log.Info("debug witness, BlockByHash", "hash", hash, "block", block, "header", block.Header(), "err", err)
+	}()
 	if block, ok := e.blocksCache.Get(hash); ok {
 		return block, nil
 	}
-	block, err := e.client.BlockByHash(ctx, hash)
+	block, err = e.client.BlockByHash(ctx, hash)
 	if err != nil {
 		return nil, err
 	}
