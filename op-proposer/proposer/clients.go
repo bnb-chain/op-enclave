@@ -136,15 +136,16 @@ func (e *ethClient) BlockByHash(ctx context.Context, hash common.Hash) (*types.B
 	defer func() {
 		log.Info("debug witness, BlockByHash", "hash", hash, "block", block, "err", err)
 	}()
-	if block, ok := e.blocksCache.Get(hash); ok {
-		return block, nil
-	}
+	// todo: Reduce debugging noise
+	// if block, ok := e.blocksCache.Get(hash); ok {
+	// 	return block, nil
+	// }
 	block, err = e.client.BlockByHash(ctx, hash)
 	if err != nil {
 		return nil, err
 	}
-	e.blocksCache.Add(block.Hash(), block)
-	e.headersCache.Add(block.Hash(), block.Header())
+	// e.blocksCache.Add(block.Hash(), block)
+	// e.headersCache.Add(block.Hash(), block.Header())
 	return block, nil
 }
 
