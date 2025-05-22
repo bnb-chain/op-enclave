@@ -246,6 +246,7 @@ func (s *Server) ExecuteStateless(
 	cfg *PerChainConfig,
 	chainConfig *params.ChainConfig,
 	l1Origin *types.Block,
+	l1OriginHeader *types.Header,
 	l1Receipts types.Receipts,
 	previousBlockTxs []hexutil.Bytes,
 	blockHeader *types.Header,
@@ -269,7 +270,8 @@ func (s *Server) ExecuteStateless(
 	}
 
 	config := NewChainConfig(cfg, chainConfig)
-	l1OriginHash := l1Origin.Hash()
+	l1OriginHash := l1OriginHeader.Hash()
+	l1Origin.WithSeal(l1OriginHeader) // todo: polish it
 	previousBlockHeader := w.Headers[0]
 
 	log.Warn("debug witness, ExecuteStateless in tee",

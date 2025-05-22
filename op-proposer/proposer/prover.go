@@ -181,6 +181,7 @@ func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, e
 		o.config,
 		o.chainConfig,
 		l1Origin.value,
+		l1Origin.value.Header(),
 		l1Receipts.value,
 		previousTxs,
 		block.Header(),
