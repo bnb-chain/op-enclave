@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/stateless"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/hashicorp/go-multierror"
 )
@@ -60,6 +61,9 @@ func NewProver(
 
 func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, error) {
 	witnessCh := await(func() (*stateless.ExecutionWitness, error) {
+		log.Info("debug witness, generate witness",
+			"l2_block_number", block.Number(),
+			"l2_block_hash", block.Hash())
 		return o.l2.ExecutionWitness(ctx, block.Hash())
 	}, func(err error) error {
 		return fmt.Errorf("failed to fetch witness: %w", err)
@@ -89,9 +93,14 @@ func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, e
 	}
 
 	l1OriginCh := await(func() (*types.Block, error) {
+		log.Info("debug witness, fetch L1 origin block",
+			"l2_block_number", block.Number(),
+			"l2_block_hash", block.Hash(),
+			"l1_block_number", blockRef.L1Origin.Number,
+			"l1_block_hash", blockRef.L1Origin.Hash)
 		return o.l1.BlockByHash(ctx, blockRef.L1Origin.Hash)
 	}, func(err error) error {
-		return fmt.Errorf("failed to fetch L1 origin header: %w", err)
+		return fmt.Errorf("failed to fetch L1 origin block: %w", err)
 	})
 
 	l1ReceiptsCh := await(func() (types.Receipts, error) {
