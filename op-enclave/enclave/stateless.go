@@ -14,6 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/stateless"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/trie"
 )
@@ -30,6 +31,13 @@ func ExecuteStateless(
 	witness *stateless.Witness,
 	messageAccount *eth.AccountResult,
 ) error {
+	log.Warn("debug witness, ExecuteStateless in tee",
+		"l1_origin_block", l1Origin,
+		"l1_origin_header", l1Origin.Header(),
+		"l1_receipts", l1Receipts,
+		"block_header", blockHeader,
+		"sequenced_txs", sequencedTxs,
+	)
 	l1OriginHash := l1Origin.Hash()
 	computed := types.DeriveSha(l1Receipts, trie.NewStackTrie(nil))
 	if computed != l1Origin.Header().ReceiptHash { // todo: panic here?
