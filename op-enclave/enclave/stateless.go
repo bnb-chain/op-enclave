@@ -65,6 +65,11 @@ func ExecuteStateless(
 		}
 		return txs, nil
 	}
+	l1Txs, err := unmarshalTxs(encodedL1Txs)
+	if err != nil {
+		return err
+	}
+
 	previousTxs, err := unmarshalTxs(previousBlockTxs)
 	if err != nil {
 		return err
@@ -74,13 +79,9 @@ func ExecuteStateless(
 	if previousTxHash != previousBlockHeader.TxHash {
 		return errors.New("invalid tx hash")
 	}
-	l1Txs, err := unmarshalTxs(encodedL1Txs)
-	if err != nil {
-		return err
-	}
 
 	previousBlock := types.NewBlockWithHeader(previousBlockHeader).WithBody(types.Body{
-		Transactions: append(l1Txs, previousTxs...),
+		Transactions: previousTxs,
 	})
 
 	l2Parent, err := derive.L2BlockToBlockRef(rollupConfig, previousBlock)

@@ -53,7 +53,6 @@ func (l *l1ReceiptsFetcher) FetchReceipts(ctx context.Context, blockHash common.
 }
 
 func (l *l1ReceiptsFetcher) InfoAndTxsByHash(ctx context.Context, hash common.Hash) (eth.BlockInfo, types.Transactions, error) {
-	//return nil, nil, errors.New("not implemented")
 	if l.hash != hash {
 		return nil, nil, errors.New("not found")
 	}
@@ -144,7 +143,6 @@ func (h headerInfo) HeaderRLP() ([]byte, error) {
 	return rlp.EncodeToBytes(h.Header)
 }
 
-// TODO: fix me
 func (h headerInfo) MillisecondTimestamp() uint64 {
 	if h.Header.MixDigest == (common.Hash{}) {
 		return 0
