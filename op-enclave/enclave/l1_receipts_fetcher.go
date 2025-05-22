@@ -56,7 +56,8 @@ func (l *l1ReceiptsFetcher) InfoAndTxsByHash(ctx context.Context, hash common.Ha
 	if l.hash != hash {
 		return nil, nil, errors.New("not found")
 	}
-	return nil /*return nil due to caller does not use it*/, l.txs, nil
+	b := types.NewBlockWithHeader(l.header)
+	return eth.BlockToInfo(b), l.txs, nil
 }
 
 func (l *l1ReceiptsFetcher) PreFetchReceipts(ctx context.Context, blockHash common.Hash) (bool, error) {
