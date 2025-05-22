@@ -32,13 +32,15 @@ func ExecuteStateless(
 	witness *stateless.Witness,
 	messageAccount *eth.AccountResult,
 ) error {
-	log.Warn("debug witness, ExecuteStateless in tee",
-		"l1_origin_block", l1Origin,
+	l1OriginHash := l1Origin.Hash()
+	log.Warn("debug witness, execute stateless in tee",
+		"l1_origin_header", l1Origin,
 		"l1_receipts", l1Receipts,
+		"l1_origin_hash", l1OriginHash,
+		"l1_origin_parent_hash", l1Origin.ParentHash,
 		"block_header", blockHeader,
 		"sequenced_txs", sequencedTxs,
 	)
-	l1OriginHash := l1Origin.Hash()
 	computed := types.DeriveSha(l1Receipts, trie.NewStackTrie(nil))
 	if computed != l1Origin.ReceiptHash {
 		return errors.New("invalid receipts")

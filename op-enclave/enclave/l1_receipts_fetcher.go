@@ -19,8 +19,8 @@ import (
 type l1ReceiptsFetcher struct {
 	hash     common.Hash
 	header   *types.Header
-	txs      types.Transactions
 	receipts types.Receipts
+	txs      types.Transactions
 	cfg      *params.ChainConfig
 }
 
@@ -55,7 +55,7 @@ func (l *l1ReceiptsFetcher) FetchReceipts(ctx context.Context, blockHash common.
 
 func (l *l1ReceiptsFetcher) InfoAndTxsByHash(ctx context.Context, hash common.Hash) (eth.BlockInfo, types.Transactions, error) {
 	if l.hash != hash {
-		log.Warn("debug witness, InfoAndTxsByHash", "expected_l1_hash", l.hash, "actual_l1_hash", hash)
+		log.Warn("debug witness, InfoAndTxsByHash", "expected_l1_hash", l.hash, "actual_l1_hash", hash, "l1_header", l.header)
 		return nil, nil, errors.New("not found")
 	}
 	b := types.NewBlockWithHeader(l.header)
