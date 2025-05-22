@@ -156,6 +156,11 @@ func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, e
 		return nil, err
 	}
 
+	log.Info("debug witness, execute enclave state transition",
+		"l2_block_number", block.Number(),
+		"l2_block_hash", block.Hash(),
+		"l1_origin_block", l1Origin.value,
+		"witness", witness.value)
 	output, err := o.enclave.ExecuteStateless(
 		ctx,
 		o.config,
@@ -170,7 +175,7 @@ func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, e
 		prevMessageAccount.value.StorageHash,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute enclave state transition: %w", err)
+		return nil, fmt.Errorf("failed to execute enclave state transition: %w, l2_block_number: %d", err, block.Number())
 	}
 	if output.L1OriginHash != blockRef.L1Origin.Hash {
 		return nil, fmt.Errorf("output L1 origin hash does not match expected: %s != %s", output.L1OriginHash, blockRef.L1Origin.Hash)
