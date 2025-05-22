@@ -20,9 +20,11 @@ type L1Client interface {
 	BlockNumber(ctx context.Context) (uint64, error)
 	HeaderByNumber(ctx context.Context, number *big.Int) (*types.Header, error)
 	HeaderByHash(ctx context.Context, hash common.Hash) (*types.Header, error)
+	BlockByHash(ctx context.Context, hash common.Hash) (*types.Block, error)
 	BlockReceipts(ctx context.Context, hash common.Hash) (types.Receipts, error)
 	CodeAt(ctx context.Context, contract common.Address, blockNumber *big.Int) ([]byte, error)
 	CallContract(ctx context.Context, call ethereum.CallMsg, blockNumber *big.Int) ([]byte, error)
+	InfoAndTxsByHash(ctx context.Context, hash common.Hash) (eth.BlockInfo, types.Transactions, error)
 	Close()
 }
 
@@ -78,6 +80,14 @@ func (e *ethClient) ChainConfig(ctx context.Context) (*params.ChainConfig, error
 	return &config, nil
 }
 
+func (e *ethClient) InfoAndTxsByHash(ctx context.Context, hash common.Hash) (eth.BlockInfo, types.Transactions, error) {
+	block, err := e.client.BlockByHash(ctx, hash)
+	if err != nil {
+		return nil, nil, err
+	}
+	return eth.BlockToInfo(block), block.Transactions(), nil
+}
+
 func (e *ethClient) BlockNumber(ctx context.Context) (uint64, error) {
 	return e.client.BlockNumber(ctx)
 }
@@ -93,6 +103,10 @@ func (e *ethClient) HeaderByHash(ctx context.Context, hash common.Hash) (*types.
 	e.headersCache.Add(hash, header)
 	return header, nil
 }
+
+// func (e *ethClient) BlockByHash(ctx context.Context, hash common.Hash) (*types.Block, error) {
+// 	return e.client.BlockByHash(ctx, hash)
+// }
 
 func (e *ethClient) HeaderByNumber(ctx context.Context, number *big.Int) (*types.Header, error) {
 	header, err := e.client.HeaderByNumber(ctx, number)

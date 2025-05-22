@@ -52,7 +52,7 @@ func NewProver(
 		config:      cfg,
 		chainConfig: chainConfig,
 		configHash:  cfg.Hash(),
-		l1:          l1,
+		l1:          l1, // todo:
 		l2:          l2,
 		enclave:     enclav,
 	}, nil
@@ -88,8 +88,8 @@ func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, e
 		return nil, fmt.Errorf("failed to derive block ref from L2 block: %w", err)
 	}
 
-	l1OriginCh := await(func() (*types.Header, error) {
-		return o.l1.HeaderByHash(ctx, blockRef.L1Origin.Hash)
+	l1OriginCh := await(func() (*types.Block, error) {
+		return o.l1.BlockByHash(ctx, blockRef.L1Origin.Hash)
 	}, func(err error) error {
 		return fmt.Errorf("failed to fetch L1 origin header: %w", err)
 	})

@@ -51,7 +51,7 @@ func (c *Client) SetSignerKey(ctx context.Context, encrypted hexutil.Bytes) erro
 	return c.callContext(ctx, nil, "setSignerKey", encrypted)
 }
 
-func (c *Client) ExecuteStateless(ctx context.Context, config *PerChainConfig, chainConfig *params.ChainConfig, l1Origin *types.Header, l1Receipts types.Receipts, previousBlockTxs []hexutil.Bytes, blockHeader *types.Header, sequencedTxs []hexutil.Bytes, witness *stateless.ExecutionWitness, messageAccount *eth.AccountResult, prevMessageAccountHash common.Hash) (*Proposal, error) {
+func (c *Client) ExecuteStateless(ctx context.Context, config *PerChainConfig, chainConfig *params.ChainConfig, l1Origin *types.Block, l1Receipts types.Receipts, previousBlockTxs []hexutil.Bytes, blockHeader *types.Header, sequencedTxs []hexutil.Bytes, witness *stateless.ExecutionWitness, messageAccount *eth.AccountResult, prevMessageAccountHash common.Hash) (*Proposal, error) {
 	var result Proposal
 	return &result, c.callContext(ctx, &result, "executeStateless", config, chainConfig, l1Origin, l1Receipts, previousBlockTxs, blockHeader, sequencedTxs, witness, messageAccount, prevMessageAccountHash)
 }

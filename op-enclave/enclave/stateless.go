@@ -22,7 +22,7 @@ func ExecuteStateless(
 	ctx context.Context,
 	config *params.ChainConfig,
 	rollupConfig *rollup.Config,
-	l1Origin *types.Header,
+	l1Origin *types.Block,
 	l1Receipts types.Receipts,
 	previousBlockTxs []hexutil.Bytes,
 	blockHeader *types.Header,
@@ -32,7 +32,7 @@ func ExecuteStateless(
 ) error {
 	l1OriginHash := l1Origin.Hash()
 	computed := types.DeriveSha(l1Receipts, trie.NewStackTrie(nil))
-	if computed != l1Origin.ReceiptHash {
+	if computed != l1Origin.Header().ReceiptHash {
 		return errors.New("invalid receipts")
 	}
 
@@ -43,7 +43,7 @@ func ExecuteStateless(
 	}
 
 	// block must only contain deposit transactions if it is outside the sequencer drift
-	if len(sequencedTxs) > 0 && blockHeader.Time > l1Origin.Time+maxSequencerDriftFjord {
+	if len(sequencedTxs) > 0 && blockHeader.Time > l1Origin.Header().Time+maxSequencerDriftFjord {
 		return errors.New("l1 origin is too old")
 	}
 
@@ -76,7 +76,7 @@ func ExecuteStateless(
 		return fmt.Errorf("failed to convert L2 block to block ref: %w", err)
 	}
 
-	if l2Parent.L1Origin.Hash != l1OriginHash && l2Parent.L1Origin.Hash != l1Origin.ParentHash {
+	if l2Parent.L1Origin.Hash != l1OriginHash && l2Parent.L1Origin.Hash != l1Origin.Header().ParentHash {
 		return errors.New("invalid L1 origin")
 	}
 
@@ -85,7 +85,7 @@ func ExecuteStateless(
 	attributeBuilder := derive.NewFetchingAttributesBuilder(rollupConfig, l1Fetcher, l2Fetcher)
 	payload, err := attributeBuilder.PreparePayloadAttributes(ctx, l2Parent, eth.BlockID{
 		Hash:   l1OriginHash,
-		Number: l1Origin.Number.Uint64(),
+		Number: l1Origin.Header().Number.Uint64(),
 	})
 	if err != nil {
 		return fmt.Errorf("failed to prepare payload attributes: %w", err)

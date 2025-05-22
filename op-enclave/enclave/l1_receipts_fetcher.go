@@ -16,16 +16,17 @@ import (
 )
 
 type l1ReceiptsFetcher struct {
+	//l1       aa.L1Client
 	hash     common.Hash
-	header   *types.Header
+	block    *types.Block
 	receipts types.Receipts
 	cfg      *params.ChainConfig
 }
 
-func NewL1ReceiptsFetcher(hash common.Hash, header *types.Header, receipts types.Receipts, cfg *params.ChainConfig) derive.L1ReceiptsFetcher {
+func NewL1ReceiptsFetcher(hash common.Hash, block *types.Block, receipts types.Receipts, cfg *params.ChainConfig) derive.L1ReceiptsFetcher {
 	return &l1ReceiptsFetcher{
 		hash:     hash,
-		header:   header,
+		block:    block,
 		receipts: receipts,
 		cfg:      cfg,
 	}
@@ -37,7 +38,7 @@ func (l *l1ReceiptsFetcher) InfoByHash(ctx context.Context, hash common.Hash) (e
 	}
 	return headerInfo{
 		hash:   l.hash,
-		Header: l.header,
+		Header: l.block.Header(),
 		cfg:    l.cfg,
 	}, nil
 }
@@ -51,7 +52,11 @@ func (l *l1ReceiptsFetcher) FetchReceipts(ctx context.Context, blockHash common.
 }
 
 func (l *l1ReceiptsFetcher) InfoAndTxsByHash(ctx context.Context, hash common.Hash) (eth.BlockInfo, types.Transactions, error) {
-	return nil, nil, errors.New("not implemented")
+	//return l.l1.InfoAndTxsByHash(ctx, hash)
+	if l.hash != hash {
+		return nil, nil, errors.New("not found")
+	}
+	return eth.BlockToInfo(l.block), l.block.Transactions(), nil
 }
 
 func (l *l1ReceiptsFetcher) PreFetchReceipts(ctx context.Context, blockHash common.Hash) (bool, error) {
@@ -138,7 +143,6 @@ func (h headerInfo) HeaderRLP() ([]byte, error) {
 	return rlp.EncodeToBytes(h.Header)
 }
 
-// TODO: fix me
 func (h headerInfo) MillisecondTimestamp() uint64 {
 	if h.Header.MixDigest == (common.Hash{}) {
 		return 0
