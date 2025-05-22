@@ -33,7 +33,6 @@ func ExecuteStateless(
 ) error {
 	log.Warn("debug witness, ExecuteStateless in tee",
 		"l1_origin_block", l1Origin,
-		"l1_origin_header", l1Origin.Header(),
 		"l1_receipts", l1Receipts,
 		"block_header", blockHeader,
 		"sequenced_txs", sequencedTxs,
