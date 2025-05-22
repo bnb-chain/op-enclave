@@ -134,7 +134,7 @@ func (e *ethClient) BlockByHash(ctx context.Context, hash common.Hash) (*types.B
 		err   error
 	)
 	defer func() {
-		log.Info("debug witness, BlockByHash", "hash", hash, "block", block, "header", block.Header(), "err", err)
+		log.Info("debug witness, BlockByHash", "hash", hash, "block", block, "err", err)
 	}()
 	if block, ok := e.blocksCache.Get(hash); ok {
 		return block, nil
