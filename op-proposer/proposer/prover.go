@@ -100,6 +100,12 @@ func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, e
 		return fmt.Errorf("failed to fetch L1 receipts: %w", err)
 	})
 
+	l1TxsCh := await(func() (types.Transactions, error) {
+		return o.l1.BlockTransactions(ctx, blockRef.L1Origin.Hash)
+	}, func(err error) error {
+		return fmt.Errorf("failed to fetch L1 txs: %w", err)
+	})
+
 	var errors []error
 
 	witness := <-witnessCh
@@ -116,6 +122,9 @@ func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, e
 
 	l1Receipts := <-l1ReceiptsCh
 	errors = appendNonNil(errors, l1Receipts.err)
+
+	l1Txs := <-l1TxsCh
+	errors = appendNonNil(errors, l1Txs.err)
 
 	prevMessageAccount := <-prevMessageAccountCh
 	errors = appendNonNil(errors, prevMessageAccount.err)
@@ -146,6 +155,10 @@ func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, e
 	if err != nil {
 		return nil, err
 	}
+	encodedL1Txs, err := marshalTxs(l1Txs.value, false)
+	if err != nil {
+		return nil, err
+	}
 
 	output, err := o.enclave.ExecuteStateless(
 		ctx,
@@ -153,6 +166,7 @@ func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, e
 		o.chainConfig,
 		l1Origin.value,
 		l1Receipts.value,
+		encodedL1Txs,
 		previousTxs,
 		block.Header(),
 		sequencedTxs,

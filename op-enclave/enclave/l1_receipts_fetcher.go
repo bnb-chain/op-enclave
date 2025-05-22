@@ -18,15 +18,17 @@ import (
 type l1ReceiptsFetcher struct {
 	hash     common.Hash
 	header   *types.Header
+	txs      types.Transactions
 	receipts types.Receipts
 	cfg      *params.ChainConfig
 }
 
-func NewL1ReceiptsFetcher(hash common.Hash, header *types.Header, receipts types.Receipts, cfg *params.ChainConfig) derive.L1ReceiptsFetcher {
+func NewL1ReceiptsFetcher(hash common.Hash, header *types.Header, receipts types.Receipts, txs types.Transactions, cfg *params.ChainConfig) derive.L1ReceiptsFetcher {
 	return &l1ReceiptsFetcher{
 		hash:     hash,
 		header:   header,
 		receipts: receipts,
+		txs:      txs,
 		cfg:      cfg,
 	}
 }
@@ -51,7 +53,11 @@ func (l *l1ReceiptsFetcher) FetchReceipts(ctx context.Context, blockHash common.
 }
 
 func (l *l1ReceiptsFetcher) InfoAndTxsByHash(ctx context.Context, hash common.Hash) (eth.BlockInfo, types.Transactions, error) {
-	return nil, nil, errors.New("not implemented")
+	//return nil, nil, errors.New("not implemented")
+	if l.hash != hash {
+		return nil, nil, errors.New("not found")
+	}
+	return nil /*return nil due to caller does not use it*/, l.txs, nil
 }
 
 func (l *l1ReceiptsFetcher) PreFetchReceipts(ctx context.Context, blockHash common.Hash) (bool, error) {

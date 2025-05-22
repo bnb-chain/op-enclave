@@ -14,6 +14,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/stateless"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/trie"
 )
@@ -24,12 +25,19 @@ func ExecuteStateless(
 	rollupConfig *rollup.Config,
 	l1Origin *types.Header,
 	l1Receipts types.Receipts,
+	encodedL1Txs []hexutil.Bytes,
 	previousBlockTxs []hexutil.Bytes,
 	blockHeader *types.Header,
 	sequencedTxs []hexutil.Bytes,
 	witness *stateless.Witness,
 	messageAccount *eth.AccountResult,
 ) error {
+	log.Warn("debug witness, ExecuteStateless in tee",
+		"l1_origin_block", l1Origin,
+		"l1_receipts", l1Receipts,
+		"block_header", blockHeader,
+		"sequenced_txs", sequencedTxs,
+	)
 	l1OriginHash := l1Origin.Hash()
 	computed := types.DeriveSha(l1Receipts, trie.NewStackTrie(nil))
 	if computed != l1Origin.ReceiptHash {
@@ -66,9 +74,13 @@ func ExecuteStateless(
 	if previousTxHash != previousBlockHeader.TxHash {
 		return errors.New("invalid tx hash")
 	}
+	l1Txs, err := unmarshalTxs(encodedL1Txs)
+	if err != nil {
+		return err
+	}
 
 	previousBlock := types.NewBlockWithHeader(previousBlockHeader).WithBody(types.Body{
-		Transactions: previousTxs,
+		Transactions: append(l1Txs, previousTxs...),
 	})
 
 	l2Parent, err := derive.L2BlockToBlockRef(rollupConfig, previousBlock)
@@ -80,7 +92,7 @@ func ExecuteStateless(
 		return errors.New("invalid L1 origin")
 	}
 
-	l1Fetcher := NewL1ReceiptsFetcher(l1OriginHash, l1Origin, l1Receipts, config)
+	l1Fetcher := NewL1ReceiptsFetcher(l1OriginHash, l1Origin, l1Receipts, l1Txs, config)
 	l2Fetcher := NewL2SystemConfigFetcher(rollupConfig, previousBlockHash, previousBlockHeader, previousTxs)
 	attributeBuilder := derive.NewFetchingAttributesBuilder(rollupConfig, l1Fetcher, l2Fetcher)
 	payload, err := attributeBuilder.PreparePayloadAttributes(ctx, l2Parent, eth.BlockID{

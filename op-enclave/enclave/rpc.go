@@ -26,6 +26,7 @@ type RPC interface {
 		chainConfig *params.ChainConfig,
 		l1Origin *types.Header,
 		l1Receipts types.Receipts,
+		l1Txs []hexutil.Bytes,
 		previousBlockTxs []hexutil.Bytes,
 		blockHeader *types.Header,
 		sequencedTxs []hexutil.Bytes,
