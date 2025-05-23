@@ -151,6 +151,6 @@ func ExecuteStateless(
 	if err = messageAccount.Verify(blockHeader.Root); err != nil {
 		return fmt.Errorf("failed to verify message account: %w", err)
 	}
-
+	log.Info("debug witness, succed to stateless execution in tee", "l2_block", block)
 	return nil
 }

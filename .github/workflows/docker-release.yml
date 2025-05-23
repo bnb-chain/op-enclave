@@ -8,8 +8,6 @@ on:
       - develop
       - main
       - adapt_opbnb
-      - fix-wrong-l1fetcher
-      - adapt_op
 
 jobs:
   push-op-enclave:
