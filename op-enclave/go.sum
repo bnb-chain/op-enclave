@@ -981,8 +981,8 @@ github.com/bnb-chain/greenfield-cometbft v1.0.0 h1:0r6hOJWD/+es0gxP/exKuN/krgXAr
 github.com/bnb-chain/greenfield-cometbft v1.0.0/go.mod h1:f35mk/r5ab6yvzlqEWZt68LfUje68sYgMpVlt2CUYMk=
 github.com/bnb-chain/op-geth v1.101315.2-0.0.20250516112649-809fafe48823 h1:hRTt36s9UHkUNCFFDI+1ulFJOg19l0h/X+z9TJ8vtzw=
 github.com/bnb-chain/op-geth v1.101315.2-0.0.20250516112649-809fafe48823/go.mod h1:hyHrrcHkUe3lRwfJs+JGrbOHp+pRdheRk+ren4TPhF8=
-github.com/bnb-chain/opbnb v0.5.4-0.20250516033433-d1421717d681 h1:qRqerrAnTAURNOa1AsLRdp6oBbQhReP49+AlODdk9NY=
-github.com/bnb-chain/opbnb v0.5.4-0.20250516033433-d1421717d681/go.mod h1:3jT4l7WSDmDyFcADb4auox2mkOd/Tn5dQ/aLBPzaY9Y=
+github.com/bnb-chain/opbnb v0.5.4-0.20250523084526-116cdea15e13 h1:nba63VbYo3dAllaX3Jr5GjgnTqvSKOWvH5D23D1FEb4=
+github.com/bnb-chain/opbnb v0.5.4-0.20250523084526-116cdea15e13/go.mod h1:f79+CBEK7HYPacx80akhTpzUaGZDe+tQR53TwNgFQKI=
 github.com/bombsimon/wsl/v2 v2.0.0/go.mod h1:mf25kr/SqFEPhhcxW1+7pxzGlW+hIl/hYTKY95VwV8U=
 github.com/bombsimon/wsl/v2 v2.2.0/go.mod h1:Azh8c3XGEJl9LyX0/sFC+CKMc7Ssgua0g+6abzXN4Pg=
 github.com/bombsimon/wsl/v3 v3.0.0/go.mod h1:st10JtZYLE4D5sC7b8xV4zTKZwAQjCH/Hy2Pm1FNZIc=

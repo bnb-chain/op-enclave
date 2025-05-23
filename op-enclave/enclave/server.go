@@ -247,6 +247,7 @@ func (s *Server) ExecuteStateless(
 	chainConfig *params.ChainConfig,
 	l1Origin *types.Header,
 	l1Receipts types.Receipts,
+	l1BaseFee *big.Int,
 	previousBlockTxs []hexutil.Bytes,
 	blockHeader *types.Header,
 	sequencedTxs []hexutil.Bytes,
@@ -273,7 +274,7 @@ func (s *Server) ExecuteStateless(
 	previousBlockHeader := w.Headers[0]
 
 	err = ExecuteStateless(ctx, config.ChainConfig, config.ToRollupConfig(),
-		l1Origin, l1Receipts, previousBlockTxs, blockHeader, sequencedTxs, w, messageAccount)
+		l1Origin, l1Receipts, l1BaseFee, previousBlockTxs, blockHeader, sequencedTxs, w, messageAccount)
 	if err != nil {
 		return nil, err
 	}

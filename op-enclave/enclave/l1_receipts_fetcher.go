@@ -138,7 +138,6 @@ func (h headerInfo) HeaderRLP() ([]byte, error) {
 	return rlp.EncodeToBytes(h.Header)
 }
 
-// TODO: fix me
 func (h headerInfo) MillisecondTimestamp() uint64 {
 	if h.Header.MixDigest == (common.Hash{}) {
 		return 0

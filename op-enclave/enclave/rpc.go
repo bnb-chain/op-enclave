@@ -2,6 +2,7 @@ package enclave
 
 import (
 	"context"
+	"math/big"
 
 	"github.com/ethereum-optimism/optimism/op-service/eth"
 	"github.com/ethereum/go-ethereum/common"
@@ -26,6 +27,7 @@ type RPC interface {
 		chainConfig *params.ChainConfig,
 		l1Origin *types.Header,
 		l1Receipts types.Receipts,
+		l1BaseFee *big.Int,
 		previousBlockTxs []hexutil.Bytes,
 		blockHeader *types.Header,
 		sequencedTxs []hexutil.Bytes,

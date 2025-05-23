@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/big"
 
 	"github.com/ethereum-optimism/optimism/op-node/rollup"
 	"github.com/ethereum-optimism/optimism/op-node/rollup/derive"
@@ -14,6 +15,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/stateless"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/trie"
 )
@@ -24,6 +26,7 @@ func ExecuteStateless(
 	rollupConfig *rollup.Config,
 	l1Origin *types.Header,
 	l1Receipts types.Receipts,
+	l1BaseFee *big.Int,
 	previousBlockTxs []hexutil.Bytes,
 	blockHeader *types.Header,
 	sequencedTxs []hexutil.Bytes,
@@ -31,6 +34,14 @@ func ExecuteStateless(
 	messageAccount *eth.AccountResult,
 ) error {
 	l1OriginHash := l1Origin.Hash()
+	log.Warn("debug witness, execute stateless in tee",
+		"l1_origin_header", l1Origin,
+		"l1_receipts", l1Receipts,
+		"l1_origin_hash", l1OriginHash,
+		"l1_origin_parent_hash", l1Origin.ParentHash,
+		"block_header", blockHeader,
+		"sequenced_txs", sequencedTxs,
+	)
 	computed := types.DeriveSha(l1Receipts, trie.NewStackTrie(nil))
 	if computed != l1Origin.ReceiptHash {
 		return errors.New("invalid receipts")
@@ -57,6 +68,7 @@ func ExecuteStateless(
 		}
 		return txs, nil
 	}
+
 	previousTxs, err := unmarshalTxs(previousBlockTxs)
 	if err != nil {
 		return err
@@ -80,13 +92,18 @@ func ExecuteStateless(
 		return errors.New("invalid L1 origin")
 	}
 
+	log.Warn("debug witness, new l1 receipts fetcher", "l1_origin_hash", l1OriginHash, "l1_origin_block", l1Origin)
 	l1Fetcher := NewL1ReceiptsFetcher(l1OriginHash, l1Origin, l1Receipts, config)
 	l2Fetcher := NewL2SystemConfigFetcher(rollupConfig, previousBlockHash, previousBlockHeader, previousTxs)
 	attributeBuilder := derive.NewFetchingAttributesBuilder(rollupConfig, l1Fetcher, l2Fetcher)
-	payload, err := attributeBuilder.PreparePayloadAttributes(ctx, l2Parent, eth.BlockID{
+	log.Warn("debug witness, prepare payload attributes in tee", "l2_parent", l2Parent, "epoch", eth.BlockID{
 		Hash:   l1OriginHash,
 		Number: l1Origin.Number.Uint64(),
 	})
+	payload, err := attributeBuilder.PreparePayloadAttributes(ctx, l2Parent, eth.BlockID{
+		Hash:   l1OriginHash,
+		Number: l1Origin.Number.Uint64(),
+	}, l1BaseFee)
 	if err != nil {
 		return fmt.Errorf("failed to prepare payload attributes: %w", err)
 	}
@@ -134,6 +151,6 @@ func ExecuteStateless(
 	if err = messageAccount.Verify(blockHeader.Root); err != nil {
 		return fmt.Errorf("failed to verify message account: %w", err)
 	}
-
+	log.Info("debug witness, succed to stateless execution in tee", "l2_block", block)
 	return nil
 }
