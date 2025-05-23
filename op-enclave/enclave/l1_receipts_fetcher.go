@@ -10,7 +10,6 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/consensus/misc/eip4844"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/holiman/uint256"
@@ -52,12 +51,7 @@ func (l *l1ReceiptsFetcher) FetchReceipts(ctx context.Context, blockHash common.
 }
 
 func (l *l1ReceiptsFetcher) InfoAndTxsByHash(ctx context.Context, hash common.Hash) (eth.BlockInfo, types.Transactions, error) {
-	if l.hash != hash {
-		log.Warn("debug witness, InfoAndTxsByHash", "expected_l1_hash", l.hash, "actual_l1_hash", hash, "l1_header", l.header)
-		return nil, nil, errors.New("not found")
-	}
-	b := types.NewBlockWithHeader(l.header)
-	return eth.BlockToInfo(b), nil, nil
+	return nil, nil, errors.New("not implemented")
 }
 
 func (l *l1ReceiptsFetcher) PreFetchReceipts(ctx context.Context, blockHash common.Hash) (bool, error) {

@@ -106,20 +106,6 @@ func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, e
 		return fmt.Errorf("failed to fetch L1 receipts: %w", err)
 	})
 
-	l1TxsCh := await(func() (types.Transactions, error) {
-		return o.l1.BlockTransactions(ctx, blockRef.L1Origin.Hash)
-	}, func(err error) error {
-		return fmt.Errorf("failed to fetch L1 txs: %w", err)
-	})
-
-	// l1BaseFeeCh := await(func() (*big.Int, error) {
-	// 	return o.calculateL1BaseFee(ctx, blockRef, blockRef.L1Origin.Number)
-	// }, func(err error) error {
-	// 	return fmt.Errorf("failed to fetch L1 base fee: %w", err)
-	// })
-
-	// _ = l1BaseFeeCh
-
 	var errors []error
 
 	witness := <-witnessCh
@@ -136,9 +122,6 @@ func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, e
 
 	l1Receipts := <-l1ReceiptsCh
 	errors = appendNonNil(errors, l1Receipts.err)
-
-	l1Txs := <-l1TxsCh
-	errors = appendNonNil(errors, l1Txs.err)
 
 	prevMessageAccount := <-prevMessageAccountCh
 	errors = appendNonNil(errors, prevMessageAccount.err)
@@ -169,14 +152,9 @@ func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, e
 	if err != nil {
 		return nil, err
 	}
-	encodedL1Txs, err := marshalTxs(l1Txs.value, false)
-	if err != nil {
-		return nil, err
-	}
 
 	var l1BaseFee *big.Int
-	{ // prepare l1 base fee for l1 info deposit tx of the l2 block
-		// l2 parent + l1 origin
+	{ // prepare l1 base fee for l1 info deposit tx of the l2 block, need l2_parent + l1_origin.
 		previousBlock := types.NewBlockWithHeader(witness.value.Headers[0]).WithBody(types.Body{
 			Transactions: previousBlock.value.Transactions(),
 		})
@@ -193,7 +171,6 @@ func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, e
 			return nil, fmt.Errorf("failed to calculate L1 base fee: %w", err)
 		}
 	}
-	_ = encodedL1Txs
 
 	output, err := o.enclave.ExecuteStateless(
 		ctx,

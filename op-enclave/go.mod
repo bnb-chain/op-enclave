@@ -137,10 +137,7 @@ require (
 // replace github.com/ethereum/go-ethereum => github.com/ethereum-optimism/op-geth v1.101503.2
 
 // https://github.com/bnb-chain/opbnb/tree/adapt_enclave import op-batcher/op-proposer
-//replace github.com/ethereum-optimism/optimism => github.com/bnb-chain/opbnb v0.5.4-0.20250516033433-d1421717d681
-
-// https://github.com/will-2012/opbnb/tree/new-adapt-enclave
-replace github.com/ethereum-optimism/optimism => github.com/will-2012/opbnb v0.0.0-20250523064839-a6ca7497dc40
+replace github.com/ethereum-optimism/optimism => github.com/bnb-chain/opbnb v0.5.4-0.20250523084526-116cdea15e13
 
 // https://github.com/bnb-chain/op-geth/tree/tmp_7702_witness, depend core.ExecuteWitness
 replace github.com/ethereum/go-ethereum => github.com/bnb-chain/op-geth v1.101315.2-0.0.20250516112649-809fafe48823

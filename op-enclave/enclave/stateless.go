@@ -68,10 +68,6 @@ func ExecuteStateless(
 		}
 		return txs, nil
 	}
-	// l1Txs, err := unmarshalTxs(encodedL1Txs)
-	// if err != nil {
-	// 	return err
-	// }
 
 	previousTxs, err := unmarshalTxs(previousBlockTxs)
 	if err != nil {

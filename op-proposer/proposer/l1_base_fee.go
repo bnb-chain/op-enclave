@@ -36,7 +36,6 @@ func (f *l1ReceiptsFetcher) GoOrUpdatePreFetchReceipts(ctx context.Context, bloc
 
 func (f *l1ReceiptsFetcher) InfoAndTxsByHash(ctx context.Context, hash common.Hash) (eth.BlockInfo, types.Transactions, error) {
 	return f.l1.InfoAndTxsByHash(ctx, hash)
-	//return nil, nil, fmt.Errorf("InfoAndTxsByHash not implemented")
 }
 
 func (f *l1ReceiptsFetcher) InfoByHash(ctx context.Context, hash common.Hash) (eth.BlockInfo, error) {
@@ -48,6 +47,7 @@ func (f *l1ReceiptsFetcher) PreFetchReceipts(ctx context.Context, blockHash comm
 }
 
 // CalculateL1BaseFee calculates the L1 base fee for a given block.
+// Need keep consistent with https://github.com/bnb-chain/opbnb/blob/4fde65a8ff1956d9756855d719dac3c93166ff50/op-node/rollup/derive/attributes.go#L110-L124.
 func (p *Prover) calculateL1BaseFee(ctx context.Context, l2Parent eth.L2BlockRef, epoch eth.BlockID) (*big.Int, error) {
 	var (
 		l1BaseFee *big.Int
