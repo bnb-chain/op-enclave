@@ -20,16 +20,14 @@ type l1ReceiptsFetcher struct {
 	hash     common.Hash
 	header   *types.Header
 	receipts types.Receipts
-	txs      types.Transactions
 	cfg      *params.ChainConfig
 }
 
-func NewL1ReceiptsFetcher(hash common.Hash, header *types.Header, receipts types.Receipts, txs types.Transactions, cfg *params.ChainConfig) derive.L1ReceiptsFetcher {
+func NewL1ReceiptsFetcher(hash common.Hash, header *types.Header, receipts types.Receipts, cfg *params.ChainConfig) derive.L1ReceiptsFetcher {
 	return &l1ReceiptsFetcher{
 		hash:     hash,
 		header:   header,
 		receipts: receipts,
-		txs:      txs,
 		cfg:      cfg,
 	}
 }
@@ -59,7 +57,7 @@ func (l *l1ReceiptsFetcher) InfoAndTxsByHash(ctx context.Context, hash common.Ha
 		return nil, nil, errors.New("not found")
 	}
 	b := types.NewBlockWithHeader(l.header)
-	return eth.BlockToInfo(b), l.txs, nil
+	return eth.BlockToInfo(b), nil, nil
 }
 
 func (l *l1ReceiptsFetcher) PreFetchReceipts(ctx context.Context, blockHash common.Hash) (bool, error) {

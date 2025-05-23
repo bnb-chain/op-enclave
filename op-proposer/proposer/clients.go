@@ -22,6 +22,7 @@ type L1Client interface {
 	HeaderByHash(ctx context.Context, hash common.Hash) (*types.Header, error)
 	BlockReceipts(ctx context.Context, hash common.Hash) (types.Receipts, error)
 	BlockTransactions(ctx context.Context, hash common.Hash) (types.Transactions, error)
+	InfoAndTxsByHash(ctx context.Context, hash common.Hash) (eth.BlockInfo, types.Transactions, error)
 	CodeAt(ctx context.Context, contract common.Address, blockNumber *big.Int) ([]byte, error)
 	CallContract(ctx context.Context, call ethereum.CallMsg, blockNumber *big.Int) ([]byte, error)
 	Close()
@@ -145,6 +146,14 @@ func (e *ethClient) BlockTransactions(ctx context.Context, hash common.Hash) (ty
 		return nil, err
 	}
 	return block.Transactions(), nil
+}
+
+func (e *ethClient) InfoAndTxsByHash(ctx context.Context, hash common.Hash) (eth.BlockInfo, types.Transactions, error) {
+	block, err := e.BlockByHash(ctx, hash)
+	if err != nil {
+		return nil, nil, err
+	}
+	return eth.BlockToInfo(block), block.Transactions(), nil
 }
 
 func (e *ethClient) CodeAt(ctx context.Context, contract common.Address, blockNumber *big.Int) ([]byte, error) {

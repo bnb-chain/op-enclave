@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/big"
 
 	"github.com/ethereum-optimism/optimism/op-node/rollup"
 	"github.com/ethereum-optimism/optimism/op-node/rollup/derive"
@@ -25,7 +26,7 @@ func ExecuteStateless(
 	rollupConfig *rollup.Config,
 	l1Origin *types.Header,
 	l1Receipts types.Receipts,
-	encodedL1Txs []hexutil.Bytes,
+	l1BaseFee *big.Int,
 	previousBlockTxs []hexutil.Bytes,
 	blockHeader *types.Header,
 	sequencedTxs []hexutil.Bytes,
@@ -67,10 +68,10 @@ func ExecuteStateless(
 		}
 		return txs, nil
 	}
-	l1Txs, err := unmarshalTxs(encodedL1Txs)
-	if err != nil {
-		return err
-	}
+	// l1Txs, err := unmarshalTxs(encodedL1Txs)
+	// if err != nil {
+	// 	return err
+	// }
 
 	previousTxs, err := unmarshalTxs(previousBlockTxs)
 	if err != nil {
@@ -96,7 +97,7 @@ func ExecuteStateless(
 	}
 
 	log.Warn("debug witness, new l1 receipts fetcher", "l1_origin_hash", l1OriginHash, "l1_origin_block", l1Origin)
-	l1Fetcher := NewL1ReceiptsFetcher(l1OriginHash, l1Origin, l1Receipts, l1Txs, config)
+	l1Fetcher := NewL1ReceiptsFetcher(l1OriginHash, l1Origin, l1Receipts, config)
 	l2Fetcher := NewL2SystemConfigFetcher(rollupConfig, previousBlockHash, previousBlockHeader, previousTxs)
 	attributeBuilder := derive.NewFetchingAttributesBuilder(rollupConfig, l1Fetcher, l2Fetcher)
 	log.Warn("debug witness, prepare payload attributes in tee", "l2_parent", l2Parent, "epoch", eth.BlockID{
@@ -106,7 +107,7 @@ func ExecuteStateless(
 	payload, err := attributeBuilder.PreparePayloadAttributes(ctx, l2Parent, eth.BlockID{
 		Hash:   l1OriginHash,
 		Number: l1Origin.Number.Uint64(),
-	})
+	}, l1BaseFee)
 	if err != nil {
 		return fmt.Errorf("failed to prepare payload attributes: %w", err)
 	}
