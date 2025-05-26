@@ -187,15 +187,7 @@ contract Portal is Initializable, ResourceMetering, ISemver {
     ///         The SystemConfig is the source of truth for the resource config.
     /// @return ResourceMetering ResourceConfig
     function _resourceConfig() internal view override returns (ResourceMetering.ResourceConfig memory) {
-        ResourceMetering.ResourceConfig memory config = systemConfig.resourceConfig();
-        return ResourceConfig({
-            maxResourceLimit: config.maxResourceLimit,
-            elasticityMultiplier: config.elasticityMultiplier,
-            baseFeeMaxChangeDenominator: config.baseFeeMaxChangeDenominator,
-            minimumBaseFee: config.minimumBaseFee,
-            systemTxMaxGas: config.systemTxMaxGas,
-            maximumBaseFee: config.maximumBaseFee
-        });
+        return systemConfig.resourceConfig();
     }
 
     /// @notice Proves a withdrawal transaction.
