@@ -16,6 +16,7 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rpc"
@@ -390,11 +391,19 @@ func (l *L2OutputSubmitter) sendTransaction(ctx context.Context, proposal *Propo
 
 // ProposeL2OutputTxData creates the transaction data for the ProposeL2Output function
 func (l *L2OutputSubmitter) ProposeL2OutputTxData(proposal *Proposal) ([]byte, error) {
-	return proposeL2OutputTxData(l.ooABI, proposal)
+	if l.Cfg.AllowNonFinalized {
+		return proposeL2OutputTxData(l.ooABI, proposal, true)
+	}
+	return proposeL2OutputTxData(l.ooABI, proposal, false)
 }
 
 // proposeL2OutputTxData creates the transaction data for the ProposeL2Output function
-func proposeL2OutputTxData(abi *abi.ABI, proposal *Proposal) ([]byte, error) {
+func proposeL2OutputTxData(abi *abi.ABI, proposal *Proposal, withCurrentL1Hash bool) ([]byte, error) {
+	currentL1Hash := common.Hash{}
+	if withCurrentL1Hash {
+		currentL1Hash = proposal.Output.L1OriginHash
+	}
+
 	sig := make([]byte, len(proposal.Output.Signature))
 	copy(sig, proposal.Output.Signature)
 	sig[64] += 27
@@ -402,6 +411,7 @@ func proposeL2OutputTxData(abi *abi.ABI, proposal *Proposal) ([]byte, error) {
 		"proposeL2Output",
 		proposal.Output.OutputRoot,
 		new(big.Int).SetUint64(proposal.To.Number),
+		currentL1Hash,
 		new(big.Int).SetUint64(proposal.To.L1Origin.Number),
 		sig,
 	)
