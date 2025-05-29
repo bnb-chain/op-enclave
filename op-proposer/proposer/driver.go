@@ -212,6 +212,7 @@ func (l *L2OutputSubmitter) loop() {
 				log.Warn("Failed to get latest proposed block number from Oracle", "err", err)
 				continue
 			}
+			log.Info("debug witness, latestOutput", "latestOutput", latestOutput)
 
 			if err = l.generateOutputs(ctx, latestOutput); err != nil {
 				l.Log.Warn("Error generating output", "err", err)
@@ -223,6 +224,7 @@ func (l *L2OutputSubmitter) loop() {
 				l.Log.Warn("Error getting output", "err", err)
 				continue
 			} else if !shouldPropose {
+				l.Log.Info("debug witness, skip propose", "latestOutput", latestOutput)
 				continue
 			}
 
@@ -261,6 +263,7 @@ func (l *L2OutputSubmitter) generateOutputs(ctx context.Context, latestOutput bi
 	// calculate `aggregateBatchSize` proofs at once, which are then aggregated in `nextOutput`
 	// TODO:: after debugging is stable, l.prover.Generate should be optimized to parallel execution
 	for i := uint64(0); i < aggregateBatchSize; i++ {
+		start := time.Now()
 		number := i + latestOutputNumber + 1
 		block, err := l.L2Client.BlockByNumber(ctx, new(big.Int).SetUint64(number))
 		if errors.Is(err, ethereum.NotFound) {
@@ -277,7 +280,8 @@ func (l *L2OutputSubmitter) generateOutputs(ctx context.Context, latestOutput bi
 
 		l.Log.Info("Generated proof for block",
 			"block", l2BlockRefToBlockID(proposal.To), "l1Origin", proposal.To.L1Origin,
-			"withdrawals", proposal.Withdrawals, "output", proposal.Output.OutputRoot.String())
+			"withdrawals", proposal.Withdrawals, "output", proposal.Output.OutputRoot.String(),
+			"cost", common.PrettyDuration(time.Since(start)))
 		l.pending = append(l.pending, proposal)
 	}
 
@@ -353,6 +357,10 @@ func (l *L2OutputSubmitter) nextOutput(ctx context.Context, latestOutput binding
 }
 
 func (l *L2OutputSubmitter) proposeOutput(ctx context.Context, proposal *Proposal) {
+	start := time.Now()
+	defer func() {
+		l.Log.Info("debug witness, propose output cost", "cost", common.PrettyDuration(time.Since(start)), "block", l2BlockRefToBlockID(proposal.To))
+	}()
 	cCtx, cancel := context.WithTimeout(ctx, 10*time.Minute)
 	defer cancel()
 
