@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/big"
+	"time"
 
 	"github.com/base/op-enclave/op-enclave/enclave"
 	"github.com/ethereum-optimism/optimism/op-node/rollup"
@@ -65,6 +66,7 @@ func NewProver(
 }
 
 func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, error) {
+	start := time.Now()
 	witnessCh := await(func() (*stateless.ExecutionWitness, error) {
 		return o.l2.ExecutionWitness(ctx, block.Hash())
 	}, func(err error) error {
@@ -171,7 +173,9 @@ func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, e
 			return nil, fmt.Errorf("failed to calculate L1 base fee: %w", err)
 		}
 	}
+	log.Info("debug witness, prepare stateless args", "cost", common.PrettyDuration(time.Since(start)))
 
+	start = time.Now()
 	output, err := o.enclave.ExecuteStateless(
 		ctx,
 		o.config,
@@ -186,6 +190,7 @@ func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, e
 		messageAccount.value,
 		prevMessageAccount.value.StorageHash,
 	)
+	log.Info("debug witness, execute stateless cost", "cost", common.PrettyDuration(time.Since(start)))
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute enclave state transition: %w", err)
 	}
