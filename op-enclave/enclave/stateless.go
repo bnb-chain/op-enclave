@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"time"
 
 	"github.com/ethereum-optimism/optimism/op-node/rollup"
 	"github.com/ethereum-optimism/optimism/op-node/rollup/derive"
@@ -134,7 +135,9 @@ func ExecuteStateless(
 	block := types.NewBlockWithHeader(blockHeader).WithBody(types.Body{
 		Transactions: txs,
 	})
+	start := time.Now()
 	blockHeader.Root, blockHeader.ReceiptHash, err = core.ExecuteStateless(config, vm.Config{}, block, witness)
+	log.Warn("debug witness, tee execute stateless cost", "cost", common.PrettyDuration(time.Since(start)))
 	if err != nil {
 		return fmt.Errorf("failed to execute stateless: %w", err)
 	}
