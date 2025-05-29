@@ -8,6 +8,7 @@ on:
       - develop
       - main
       - adapt_opbnb
+      - adddebuglog
 
 jobs:
   push-op-enclave:
