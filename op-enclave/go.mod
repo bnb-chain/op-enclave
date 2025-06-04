@@ -140,7 +140,7 @@ require (
 replace github.com/ethereum-optimism/optimism => github.com/bnb-chain/opbnb v0.5.4-0.20250523084526-116cdea15e13
 
 // https://github.com/bnb-chain/op-geth/tree/tmp_7702_witness, depend core.ExecuteWitness
-replace github.com/ethereum/go-ethereum => github.com/bnb-chain/op-geth v1.101315.2-0.0.20250516112649-809fafe48823
+replace github.com/ethereum/go-ethereum => github.com/will-2012/op-geth v0.2.2-rc.1.0.20250604141937-6f01ca70215e
 
 // fix verkle tree conflict
 replace github.com/crate-crypto/go-ipa => github.com/crate-crypto/go-ipa v0.0.0-20231205143816-408dbffb2041

@@ -176,7 +176,7 @@ require (
 replace github.com/base/op-enclave/op-enclave => ./op-enclave
 
 // https://github.com/bnb-chain/op-geth/tree/tee-base-stateless-poc, depend core.ExecuteWitness
-replace github.com/ethereum/go-ethereum => github.com/bnb-chain/op-geth v1.101315.2-0.0.20250520053659-1fde7613d115
+replace github.com/ethereum/go-ethereum => github.com/will-2012/op-geth v0.2.2-rc.1.0.20250604141937-6f01ca70215e
 
 // https://github.com/bnb-chain/opbnb/tree/adapt_enclave import op-batcher/op-proposer
 replace github.com/ethereum-optimism/optimism => github.com/bnb-chain/opbnb v0.5.4-0.20250523084526-116cdea15e13
