@@ -996,8 +996,8 @@ github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869/go.mod h1:Ekp36dR
 github.com/bnb-chain/fastssz v0.1.2/go.mod h1:KcabV+OEw2QwgyY8Fc88ZG79CKYkFdu0kKWyfA3dI6o=
 github.com/bnb-chain/greenfield-cometbft v1.0.0 h1:0r6hOJWD/+es0gxP/exKuN/krgXAr3LCn5/XlcgDWr8=
 github.com/bnb-chain/greenfield-cometbft v1.0.0/go.mod h1:f35mk/r5ab6yvzlqEWZt68LfUje68sYgMpVlt2CUYMk=
-github.com/bnb-chain/op-geth v1.101315.2-0.0.20250520053659-1fde7613d115 h1:zIqD55hPe6tiZPrOhR8x40MV8iQNjjouajkmmmf6qZo=
-github.com/bnb-chain/op-geth v1.101315.2-0.0.20250520053659-1fde7613d115/go.mod h1:hyHrrcHkUe3lRwfJs+JGrbOHp+pRdheRk+ren4TPhF8=
+github.com/bnb-chain/op-geth v1.101315.2-0.0.20250605122034-2f3d2af34830 h1:DeD+6U6+jd3IpVOHM/e98Eq1/n8oYdP2lEFjxTayLwc=
+github.com/bnb-chain/op-geth v1.101315.2-0.0.20250605122034-2f3d2af34830/go.mod h1:hyHrrcHkUe3lRwfJs+JGrbOHp+pRdheRk+ren4TPhF8=
 github.com/bnb-chain/opbnb v0.5.4-0.20250523084526-116cdea15e13 h1:nba63VbYo3dAllaX3Jr5GjgnTqvSKOWvH5D23D1FEb4=
 github.com/bnb-chain/opbnb v0.5.4-0.20250523084526-116cdea15e13/go.mod h1:f79+CBEK7HYPacx80akhTpzUaGZDe+tQR53TwNgFQKI=
 github.com/bombsimon/wsl/v2 v2.0.0/go.mod h1:mf25kr/SqFEPhhcxW1+7pxzGlW+hIl/hYTKY95VwV8U=
