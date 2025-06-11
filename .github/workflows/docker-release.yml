@@ -8,6 +8,7 @@ on:
       - develop
       - main
       - adapt_opbnb
+      - try-fix-statelessbug
 
 jobs:
   push-op-enclave:
@@ -81,7 +82,7 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           provenance: false
 
   push-op-proposer:
@@ -116,5 +117,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           provenance: false
