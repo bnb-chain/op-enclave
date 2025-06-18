@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum-optimism/optimism/op-node/rollup/derive"
 	"github.com/ethereum-optimism/optimism/op-service/predeploys"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/log"
 )
 
 var ErrWithdrawalDetected = errors.New("withdrawal detected")
@@ -31,7 +32,7 @@ type channelOut struct {
 	withdrawalDetected bool
 }
 
-func (c *channelOut) AddBlock(config *rollup.Config, block *types.Block) (*derive.L1BlockInfo, error) {
+func (c *channelOut) AddBlock(config *rollup.Config, block *types.Block) error {
 	if block.Bloom().Test(predeploys.L2ToL1MessagePasserAddr.Bytes()) {
 		c.withdrawalDetected = true
 	}
@@ -41,6 +42,7 @@ func (c *channelOut) AddBlock(config *rollup.Config, block *types.Block) (*deriv
 	if c.withdrawalDetected && time.Unix(int64(block.Time()), 0).Add(minBlockFreshness).After(time.Now()) {
 		c.fullErr = ErrWithdrawalDetected
 	}
+	log.Debug("op enclave channel out add block", "block", block.NumberU64())
 	return c.ChannelOut.AddBlock(config, block)
 }
 

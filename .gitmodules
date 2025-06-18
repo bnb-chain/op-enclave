@@ -7,3 +7,18 @@
 [submodule "lib/nitro-validator"]
 	path = contracts/lib/nitro-validator
 	url = https://github.com/base/nitro-validator
+[submodule "contracts/lib/openzeppelin-contracts"]
+	path = contracts/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "opbnb-contracts/lib/forge-std"]
+	path = opbnb-contracts/lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
+[submodule "opbnb-contracts/lib/nitro-validator"]
+	path = opbnb-contracts/lib/nitro-validator
+	url = https://github.com/base/nitro-validator
+[submodule "opbnb-contracts/lib/openzeppelin-contracts"]
+	path = opbnb-contracts/lib/openzeppelin-contracts
+	url = https://github.com/OpenZeppelin/openzeppelin-contracts
+[submodule "opbnb-contracts/lib/opbnb"]
+	path = opbnb-contracts/lib/opbnb
+	url = https://github.com/bnb-chain/opbnb

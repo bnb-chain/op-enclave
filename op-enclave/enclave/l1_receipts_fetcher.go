@@ -12,6 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/holiman/uint256"
 )
 
 type l1ReceiptsFetcher struct {
@@ -47,6 +48,22 @@ func (l *l1ReceiptsFetcher) FetchReceipts(ctx context.Context, blockHash common.
 		return nil, nil, err
 	}
 	return info, l.receipts, nil
+}
+
+func (l *l1ReceiptsFetcher) InfoAndTxsByHash(ctx context.Context, hash common.Hash) (eth.BlockInfo, types.Transactions, error) {
+	return nil, nil, errors.New("not implemented")
+}
+
+func (l *l1ReceiptsFetcher) PreFetchReceipts(ctx context.Context, blockHash common.Hash) (bool, error) {
+	return false, errors.New("not implemented")
+}
+
+func (l *l1ReceiptsFetcher) GoOrUpdatePreFetchReceipts(ctx context.Context, l1StartBlock uint64) error {
+	return errors.New("not implemented")
+}
+
+func (l *l1ReceiptsFetcher) ClearReceiptsCacheBefore(blockNumber uint64) {
+	// no-op
 }
 
 type headerInfo struct {
@@ -90,7 +107,7 @@ func (h headerInfo) BaseFee() *big.Int {
 }
 
 func (h headerInfo) BlobBaseFee() *big.Int {
-	return eip4844.CalcBlobFee(h.cfg, h.Header)
+	return eip4844.CalcBlobFee(*h.Header.ExcessBlobGas)
 }
 
 func (h headerInfo) ExcessBlobGas() *uint64 {
@@ -119,4 +136,11 @@ func (h headerInfo) ParentBeaconRoot() *common.Hash {
 
 func (h headerInfo) HeaderRLP() ([]byte, error) {
 	return rlp.EncodeToBytes(h.Header)
+}
+
+func (h headerInfo) MillisecondTimestamp() uint64 {
+	if h.Header.MixDigest == (common.Hash{}) {
+		return 0
+	}
+	return uint256.NewInt(0).SetBytes2(h.Header.MixDigest[:2]).Uint64()
 }

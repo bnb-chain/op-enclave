@@ -18,12 +18,14 @@ import (
 	"time"
 
 	"github.com/ethereum-optimism/optimism/op-service/eth"
+	"github.com/ethereum-optimism/optimism/op-service/predeploys"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/stateless"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/params"
 	"github.com/hf/nitrite"
 	"github.com/hf/nsm"
 	"github.com/hf/nsm/request"
@@ -40,7 +42,7 @@ const (
 
 var (
 	defaultRoot                = createAWSNitroRoot()
-	l2ToL1MessagePasserAddress = common.HexToAddress("0x4200000000000000000000000000000000000016")
+	l2ToL1MessagePasserAddress = predeploys.L2ToL1MessagePasserAddr
 )
 
 func createAWSNitroRoot() *x509.CertPool {
@@ -54,6 +56,9 @@ func createAWSNitroRoot() *x509.CertPool {
 		panic("DefaultCARoots checksum failed")
 	}
 	reader, err := zip.NewReader(bytes.NewReader(roots), int64(len(roots)))
+	if err != nil {
+		panic("error new zip reader")
+	}
 	ca, err := reader.File[0].Open()
 	if err != nil {
 		panic("error reading AWS root cert zip")
@@ -239,8 +244,10 @@ type Proposal struct {
 func (s *Server) ExecuteStateless(
 	ctx context.Context,
 	cfg *PerChainConfig,
+	chainConfig *params.ChainConfig,
 	l1Origin *types.Header,
 	l1Receipts types.Receipts,
+	l1BaseFee *big.Int,
 	previousBlockTxs []hexutil.Bytes,
 	blockHeader *types.Header,
 	sequencedTxs []hexutil.Bytes,
@@ -262,12 +269,12 @@ func (s *Server) ExecuteStateless(
 		State:   state,
 	}
 
-	config := NewChainConfig(cfg)
+	config := NewChainConfig(cfg, chainConfig)
 	l1OriginHash := l1Origin.Hash()
 	previousBlockHeader := w.Headers[0]
 
 	err = ExecuteStateless(ctx, config.ChainConfig, config.ToRollupConfig(),
-		l1Origin, l1Receipts, previousBlockTxs, blockHeader, sequencedTxs, w, messageAccount)
+		l1Origin, l1Receipts, l1BaseFee, previousBlockTxs, blockHeader, sequencedTxs, w, messageAccount)
 	if err != nil {
 		return nil, err
 	}
@@ -286,9 +293,6 @@ func (s *Server) ExecuteStateless(
 		return nil, fmt.Errorf("failed to sign: %w", err)
 	}
 
-	if err != nil {
-		return nil, err
-	}
 	return &Proposal{
 		OutputRoot:    outputRoot,
 		Signature:     sig,

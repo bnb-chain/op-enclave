@@ -29,6 +29,10 @@ func NewL2SystemConfigFetcher(config *rollup.Config, hash common.Hash, header *t
 	}
 }
 
+func (l *l2SystemConfigFetcher) CachePayloadByHash(payload *eth.ExecutionPayloadEnvelope) bool {
+	return false
+}
+
 func (l *l2SystemConfigFetcher) SystemConfigByL2Hash(ctx context.Context, hash common.Hash) (eth.SystemConfig, error) {
 	if hash != l.hash {
 		return eth.SystemConfig{}, errors.New("not found")

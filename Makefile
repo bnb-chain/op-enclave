@@ -3,10 +3,10 @@ guard-%:
 
 define abigen
 	echo "Generating bindings for $(1)"
-	cp contracts/out/$(1).sol/$(1).$(3).json contracts/out/$(1).sol/$(1).json 2>/dev/null || true
-	jq -r '.bytecode.object' contracts/out/$(1).sol/$(1).json > contracts/out/$(1).sol/$(1).bin
-	jq -r '.abi' contracts/out/$(1).sol/$(1).json > contracts/out/$(1).sol/$(1).abi
-	abigen --abi contracts/out/$(1).sol/$(1).abi --bin contracts/out/$(1).sol/$(1).bin --pkg bindings --type $(1) --out bindings/$(2).go
+	cp opbnb-contracts/out/$(1).sol/$(1).$(3).json opbnb-contracts/out/$(1).sol/$(1).json 2>/dev/null || true
+	jq -r '.bytecode.object' opbnb-contracts/out/$(1).sol/$(1).json > opbnb-contracts/out/$(1).sol/$(1).bin
+	jq -r '.abi' opbnb-contracts/out/$(1).sol/$(1).json > opbnb-contracts/out/$(1).sol/$(1).abi
+	abigen --abi opbnb-contracts/out/$(1).sol/$(1).abi --bin opbnb-contracts/out/$(1).sol/$(1).bin --pkg bindings --type $(1) --out bindings/$(2).go
 endef
 
 define verify
@@ -29,14 +29,14 @@ endef
 
 .PHONY: bindings
 bindings:
-	go install github.com/ethereum/go-ethereum/cmd/abigen@v1.14.11
-	cd contracts && forge build
+	go install github.com/ethereum/go-ethereum/cmd/abigen@latest
+	cd opbnb-contracts && forge build
 	mkdir -p bindings
-	@$(call abigen,"OutputOracle","output_oracle","0.8.15")
+	@$(call abigen,"L2OutputOracle","l2_output_oracle","0.8.15")
 	@$(call abigen,"Portal","portal","0.8.15")
 	@$(call abigen,"DeployChain","deploy_chain","0.8.15")
 	@$(call abigen,"CertManager","cert_manager","0.8.15")
-	@$(call abigen,"SystemConfigGlobal","system_config_global","0.8.15")
+	@$(call abigen,"NitroEnclavesManager","nitro_enclaves_manager","0.8.15")
 	@$(call abigen,"GnosisSafe","gnosis_safe","0.8.15")
 
 .PHONY: deploy-cert-manager
@@ -64,3 +64,37 @@ verify:
 	@$(call verify,"contracts/broadcast/DeployCertManager.s.sol/84532/run-1736384133.json","0.8.24")
 	@$(call verify,"contracts/broadcast/DeploySystem.s.sol/84532/run-1736385859.json","0.8.15")
 	#@$(call verify,"contracts/broadcast/DeployDeployChain.s.sol/84532/run-1733884066.json","0.8.15")
+
+.PHONY: op-batcher
+op-batcher:
+	@echo "Building op-batcher..."
+	@mkdir -p build
+	@cd op-batcher && go build -o ../build/op-batcher ./cmd/main.go
+	@echo "op-batcher binary has been built and placed in build/ directory"
+
+.PHONY: op-proposer
+op-proposer:
+	@echo "Building op-proposer..."
+	@go mod tidy
+	@mkdir -p build
+	@cd op-proposer && go build -o ../build/op-proposer ./cmd/main.go
+	@echo "op-proposer binary has been built and placed in build/ directory"
+
+.PHONY: op-enclave
+op-enclave:
+	@echo "Building op-enclave..."
+	@mkdir -p build
+	@cd op-enclave && go mod tidy && go build -o ../build/op-enclave ./cmd/enclave/main.go
+	@echo "op-enclave binary has been built and placed in build/ directory"
+	@cd op-enclave && go mod tidy && go build -o ../build/op-enclave-server ./cmd/server/main.go
+	@echo "op-enclave-server binary has been built and placed in build/ directory"
+
+.PHONY: clear
+clear:
+	@echo "Cleaning build directory..."
+	@rm -rf build
+	@echo "Build directory has been cleaned"
+
+.PHONY: all
+all: op-batcher op-proposer op-enclave
+	@echo "All components have been built successfully"

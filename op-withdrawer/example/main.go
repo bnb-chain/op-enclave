@@ -71,7 +71,7 @@ func main() {
 	}
 	l2g := gethclient.New(l2.Client())
 
-	outputOracle, err := bindings.NewOutputOracle(l2OO, l1)
+	outputOracle, err := bindings.NewL2OutputOracle(l2OO, l1)
 	if err != nil {
 		log.Fatalf("Failed to bind to output oracle: %v", err)
 	}
@@ -228,7 +228,7 @@ func WithdrawDeposit(ctx context.Context, l1, l2 *ethclient.Client, optsFactory 
 	return
 }
 
-func ProveWithdrawal(ctx context.Context, l1, l2 *ethclient.Client, l2g *gethclient.Client, opts *bind.TransactOpts, outputOracle *bindings.OutputOracle, portal *bindings.Portal, withdrawalTxHash common.Hash, withdrawalTxBlock *big.Int) *types.Receipt {
+func ProveWithdrawal(ctx context.Context, l1, l2 *ethclient.Client, l2g *gethclient.Client, opts *bind.TransactOpts, outputOracle *bindings.L2OutputOracle, portal *bindings.Portal, withdrawalTxHash common.Hash, withdrawalTxBlock *big.Int) *types.Receipt {
 	fmt.Printf("Waiting for TEE proof of block %d... ", withdrawalTxBlock)
 	l2OutputBlock, err := withdrawals.WaitForOutputBlock(ctx, outputOracle, withdrawalTxBlock, pollInterval)
 	fmt.Println("done")

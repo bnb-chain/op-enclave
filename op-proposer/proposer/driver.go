@@ -16,6 +16,7 @@ import (
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rpc"
@@ -85,7 +86,7 @@ func NewL2OutputSubmitter(setup DriverSetup) (_ *L2OutputSubmitter, err error) {
 }
 
 func newL2OOSubmitter(ctx context.Context, cancel context.CancelFunc, setup DriverSetup) (*L2OutputSubmitter, error) {
-	ooContract, err := bindings.NewOutputOracleCaller(*setup.Cfg.L2OutputOracleAddr, setup.L1Client)
+	ooContract, err := bindings.NewL2OutputOracleCaller(*setup.Cfg.L2OutputOracleAddr, setup.L1Client)
 	if err != nil {
 		cancel()
 		return nil, fmt.Errorf("failed to create L2OO at address %s: %w", setup.Cfg.L2OutputOracleAddr, err)
@@ -100,7 +101,7 @@ func newL2OOSubmitter(ctx context.Context, cancel context.CancelFunc, setup Driv
 	}
 	log.Info("Connected to L2OutputOracle", "address", setup.Cfg.L2OutputOracleAddr, "version", version)
 
-	parsed, err := bindings.OutputOracleMetaData.GetAbi()
+	parsed, err := bindings.L2OutputOracleMetaData.GetAbi()
 	if err != nil {
 		cancel()
 		return nil, err
@@ -258,7 +259,9 @@ func (l *L2OutputSubmitter) generateOutputs(ctx context.Context, latestOutput bi
 	}
 
 	// calculate `aggregateBatchSize` proofs at once, which are then aggregated in `nextOutput`
+	// TODO:: after debugging is stable, l.prover.Generate should be optimized to parallel execution
 	for i := uint64(0); i < aggregateBatchSize; i++ {
+		start := time.Now()
 		number := i + latestOutputNumber + 1
 		block, err := l.L2Client.BlockByNumber(ctx, new(big.Int).SetUint64(number))
 		if errors.Is(err, ethereum.NotFound) {
@@ -275,7 +278,8 @@ func (l *L2OutputSubmitter) generateOutputs(ctx context.Context, latestOutput bi
 
 		l.Log.Info("Generated proof for block",
 			"block", l2BlockRefToBlockID(proposal.To), "l1Origin", proposal.To.L1Origin,
-			"withdrawals", proposal.Withdrawals, "output", proposal.Output.OutputRoot.String())
+			"withdrawals", proposal.Withdrawals, "output", proposal.Output.OutputRoot.String(),
+			"cost", common.PrettyDuration(time.Since(start)))
 		l.pending = append(l.pending, proposal)
 	}
 
@@ -389,11 +393,19 @@ func (l *L2OutputSubmitter) sendTransaction(ctx context.Context, proposal *Propo
 
 // ProposeL2OutputTxData creates the transaction data for the ProposeL2Output function
 func (l *L2OutputSubmitter) ProposeL2OutputTxData(proposal *Proposal) ([]byte, error) {
-	return proposeL2OutputTxData(l.ooABI, proposal)
+	if l.Cfg.AllowNonFinalized {
+		return proposeL2OutputTxData(l.ooABI, proposal, true)
+	}
+	return proposeL2OutputTxData(l.ooABI, proposal, false)
 }
 
 // proposeL2OutputTxData creates the transaction data for the ProposeL2Output function
-func proposeL2OutputTxData(abi *abi.ABI, proposal *Proposal) ([]byte, error) {
+func proposeL2OutputTxData(abi *abi.ABI, proposal *Proposal, withCurrentL1Hash bool) ([]byte, error) {
+	currentL1Hash := common.Hash{}
+	if withCurrentL1Hash {
+		currentL1Hash = proposal.Output.L1OriginHash
+	}
+
 	sig := make([]byte, len(proposal.Output.Signature))
 	copy(sig, proposal.Output.Signature)
 	sig[64] += 27
@@ -401,6 +413,7 @@ func proposeL2OutputTxData(abi *abi.ABI, proposal *Proposal) ([]byte, error) {
 		"proposeL2Output",
 		proposal.Output.OutputRoot,
 		new(big.Int).SetUint64(proposal.To.Number),
+		currentL1Hash,
 		new(big.Int).SetUint64(proposal.To.L1Origin.Number),
 		sig,
 	)

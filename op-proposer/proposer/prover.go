@@ -3,8 +3,10 @@ package proposer
 import (
 	"context"
 	"fmt"
+	"math/big"
 
 	"github.com/base/op-enclave/op-enclave/enclave"
+	"github.com/ethereum-optimism/optimism/op-node/rollup"
 	"github.com/ethereum-optimism/optimism/op-node/rollup/derive"
 	"github.com/ethereum-optimism/optimism/op-service/eth"
 	"github.com/ethereum-optimism/optimism/op-service/predeploys"
@@ -12,15 +14,19 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/stateless"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/log"
+	"github.com/ethereum/go-ethereum/params"
 	"github.com/hashicorp/go-multierror"
 )
 
 type Prover struct {
-	config     *enclave.PerChainConfig
-	configHash common.Hash
-	l1         L1Client
-	l2         L2Client
-	enclave    enclave.RPC
+	rollupCfg   *rollup.Config
+	config      *enclave.PerChainConfig
+	chainConfig *params.ChainConfig
+	configHash  common.Hash
+	l1          L1Client
+	l2          L2Client
+	enclave     enclave.RPC
 }
 
 type Proposal struct {
@@ -42,13 +48,19 @@ func NewProver(
 		return nil, fmt.Errorf("failed to fetch rollup config: %w", err)
 	}
 	cfg := enclave.FromRollupConfig(rollupConfig)
-
+	chainConfig, err := l2.ChainConfig(context.Background())
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch chain config: %w", err)
+	}
+	log.Info("succeed to new proposer", "chain_config", chainConfig, "rollup_config", rollupConfig)
 	return &Prover{
-		config:     cfg,
-		configHash: cfg.Hash(),
-		l1:         l1,
-		l2:         l2,
-		enclave:    enclav,
+		rollupCfg:   rollupConfig,
+		config:      cfg,
+		chainConfig: chainConfig,
+		configHash:  cfg.Hash(),
+		l1:          l1,
+		l2:          l2,
+		enclave:     enclav,
 	}, nil
 }
 
@@ -141,11 +153,32 @@ func (o *Prover) Generate(ctx context.Context, block *types.Block) (*Proposal, e
 		return nil, err
 	}
 
+	var l1BaseFee *big.Int
+	{ // prepare l1 base fee for l1 info deposit tx of the l2 block, need l2_parent + l1_origin.
+		previousBlock := types.NewBlockWithHeader(witness.value.Headers[0]).WithBody(types.Body{
+			Transactions: previousBlock.value.Transactions(),
+		})
+
+		l2Parent, err := derive.L2BlockToBlockRef(o.rollupCfg, previousBlock)
+		if err != nil {
+			return nil, fmt.Errorf("failed to convert parent L2 block to block ref: %w", err)
+		}
+		l1BaseFee, err = o.calculateL1BaseFee(ctx, l2Parent, eth.BlockID{
+			Hash:   l1Origin.value.Hash(),
+			Number: l1Origin.value.Number.Uint64(),
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to calculate L1 base fee: %w", err)
+		}
+	}
+
 	output, err := o.enclave.ExecuteStateless(
 		ctx,
 		o.config,
+		o.chainConfig,
 		l1Origin.value,
 		l1Receipts.value,
+		l1BaseFee, // l1 base fee for l1 info deposit tx of the l2 block
 		previousTxs,
 		block.Header(),
 		sequencedTxs,

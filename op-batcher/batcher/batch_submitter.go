@@ -28,7 +28,7 @@ func Main(version string) cliapp.LifecycleAction {
 		oplog.SetGlobalLogHandler(l.Handler())
 		opservice.ValidateEnvVars(flags.EnvVarPrefix, flags.Flags, l)
 
-		l.Info("Initializing Batch Submitter")
+		l.Info("Initializing Enclave Batch Submitter")
 		channelFactoryOpt := func(setup *batcher.DriverSetup) {
 			setup.ChannelOutFactory = NewChannelOut
 		}

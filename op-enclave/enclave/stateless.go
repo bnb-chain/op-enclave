@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"math/big"
 
 	"github.com/ethereum-optimism/optimism/op-node/rollup"
 	"github.com/ethereum-optimism/optimism/op-node/rollup/derive"
@@ -14,6 +15,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/stateless"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/core/vm"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/trie"
 )
@@ -24,6 +26,7 @@ func ExecuteStateless(
 	rollupConfig *rollup.Config,
 	l1Origin *types.Header,
 	l1Receipts types.Receipts,
+	l1BaseFee *big.Int,
 	previousBlockTxs []hexutil.Bytes,
 	blockHeader *types.Header,
 	sequencedTxs []hexutil.Bytes,
@@ -57,6 +60,7 @@ func ExecuteStateless(
 		}
 		return txs, nil
 	}
+
 	previousTxs, err := unmarshalTxs(previousBlockTxs)
 	if err != nil {
 		return err
@@ -86,7 +90,7 @@ func ExecuteStateless(
 	payload, err := attributeBuilder.PreparePayloadAttributes(ctx, l2Parent, eth.BlockID{
 		Hash:   l1OriginHash,
 		Number: l1Origin.Number.Uint64(),
-	})
+	}, l1BaseFee)
 	if err != nil {
 		return fmt.Errorf("failed to prepare payload attributes: %w", err)
 	}
@@ -134,6 +138,6 @@ func ExecuteStateless(
 	if err = messageAccount.Verify(blockHeader.Root); err != nil {
 		return fmt.Errorf("failed to verify message account: %w", err)
 	}
-
+	log.Info("succeed to stateless execution in tee", "l2_block", block)
 	return nil
 }

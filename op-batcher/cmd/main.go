@@ -10,8 +10,8 @@ import (
 
 	opservice "github.com/ethereum-optimism/optimism/op-service"
 	"github.com/ethereum-optimism/optimism/op-service/cliapp"
-	"github.com/ethereum-optimism/optimism/op-service/ctxinterrupt"
 	oplog "github.com/ethereum-optimism/optimism/op-service/log"
+	"github.com/ethereum-optimism/optimism/op-service/opio"
 	"github.com/ethereum/go-ethereum/log"
 )
 
@@ -32,7 +32,7 @@ func main() {
 	app.Description = "Service for generating and submitting L2 tx batches to L1"
 	app.Action = cliapp.LifecycleCmd(batcher.Main(Version))
 
-	ctx := ctxinterrupt.WithSignalWaiterMain(context.Background())
+	ctx := opio.WithInterruptBlocker(context.Background())
 	err := app.RunContext(ctx, os.Args)
 	if err != nil {
 		log.Crit("Application failed", "message", err)

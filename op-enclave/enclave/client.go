@@ -2,12 +2,14 @@ package enclave
 
 import (
 	"context"
+	"math/big"
 
 	"github.com/ethereum-optimism/optimism/op-service/eth"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/stateless"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rpc"
 )
 
@@ -50,9 +52,9 @@ func (c *Client) SetSignerKey(ctx context.Context, encrypted hexutil.Bytes) erro
 	return c.callContext(ctx, nil, "setSignerKey", encrypted)
 }
 
-func (c *Client) ExecuteStateless(ctx context.Context, config *PerChainConfig, l1Origin *types.Header, l1Receipts types.Receipts, previousBlockTxs []hexutil.Bytes, blockHeader *types.Header, sequencedTxs []hexutil.Bytes, witness *stateless.ExecutionWitness, messageAccount *eth.AccountResult, prevMessageAccountHash common.Hash) (*Proposal, error) {
+func (c *Client) ExecuteStateless(ctx context.Context, config *PerChainConfig, chainConfig *params.ChainConfig, l1Origin *types.Header, l1Receipts types.Receipts, l1BaseFee *big.Int, previousBlockTxs []hexutil.Bytes, blockHeader *types.Header, sequencedTxs []hexutil.Bytes, witness *stateless.ExecutionWitness, messageAccount *eth.AccountResult, prevMessageAccountHash common.Hash) (*Proposal, error) {
 	var result Proposal
-	return &result, c.callContext(ctx, &result, "executeStateless", config, l1Origin, l1Receipts, previousBlockTxs, blockHeader, sequencedTxs, witness, messageAccount, prevMessageAccountHash)
+	return &result, c.callContext(ctx, &result, "executeStateless", config, chainConfig, l1Origin, l1Receipts, l1BaseFee, previousBlockTxs, blockHeader, sequencedTxs, witness, messageAccount, prevMessageAccountHash)
 }
 
 func (c *Client) Aggregate(ctx context.Context, configHash common.Hash, prevOutputRoot common.Hash, proposals []*Proposal) (*Proposal, error) {
