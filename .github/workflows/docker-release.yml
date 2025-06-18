@@ -8,7 +8,6 @@ on:
       - develop
       - main
       - adapt_opbnb
-      - try-fix-statelessbug
 
 jobs:
   push-op-enclave:
