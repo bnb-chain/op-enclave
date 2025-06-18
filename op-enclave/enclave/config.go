@@ -71,6 +71,5 @@ func (p *PerChainConfig) MarshalBinary() (data []byte) {
 	data = binary.BigEndian.AppendUint64(data, p.Genesis.SystemConfig.GasLimit)
 	data = append(data, p.DepositContractAddress.Bytes()...)
 	data = append(data, p.L1SystemConfigAddress.Bytes()...)
-	// no need to marshal rollup config
 	return data
 }

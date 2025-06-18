@@ -212,7 +212,6 @@ func (l *L2OutputSubmitter) loop() {
 				log.Warn("Failed to get latest proposed block number from Oracle", "err", err)
 				continue
 			}
-			log.Info("debug witness, latestOutput", "latestOutput", latestOutput)
 
 			if err = l.generateOutputs(ctx, latestOutput); err != nil {
 				l.Log.Warn("Error generating output", "err", err)
@@ -224,7 +223,6 @@ func (l *L2OutputSubmitter) loop() {
 				l.Log.Warn("Error getting output", "err", err)
 				continue
 			} else if !shouldPropose {
-				l.Log.Info("debug witness, skip propose", "latestOutput", latestOutput)
 				continue
 			}
 
@@ -357,10 +355,6 @@ func (l *L2OutputSubmitter) nextOutput(ctx context.Context, latestOutput binding
 }
 
 func (l *L2OutputSubmitter) proposeOutput(ctx context.Context, proposal *Proposal) {
-	start := time.Now()
-	defer func() {
-		l.Log.Info("debug witness, propose output cost", "cost", common.PrettyDuration(time.Since(start)), "block", l2BlockRefToBlockID(proposal.To))
-	}()
 	cCtx, cancel := context.WithTimeout(ctx, 10*time.Minute)
 	defer cancel()
 
