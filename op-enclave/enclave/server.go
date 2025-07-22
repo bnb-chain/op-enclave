@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"context"
 	"crypto/ecdsa"
-	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/x509"
@@ -14,7 +13,6 @@ import (
 	"fmt"
 	"io"
 	"math/big"
-	"os"
 	"time"
 
 	"github.com/ethereum-optimism/optimism/op-service/eth"
@@ -90,9 +88,9 @@ func NewServer() (*Server, error) {
 	var signerKeyEnv string
 	if err != nil {
 		log.Warn("failed to open Nitro Secure Module session, running in local mode", "error", err)
-		random = rand.Reader
+		// random = rand.Reader
 		// only allow a signer key to be set in local mode
-		signerKeyEnv = os.Getenv("OP_ENCLAVE_SIGNER_KEY")
+		// signerKeyEnv = os.Getenv("OP_ENCLAVE_SIGNER_KEY")
 		return nil, errors.New("failed to open Nitro Secure Module session, running in local mode")
 	} else {
 		defer func() {
@@ -208,7 +206,7 @@ func (s *Server) EncryptedSignerKey(ctx context.Context, attestation hexutil.Byt
 	defer func() {
 		_ = session.Close()
 	}()
-	ciphertext, err := rsa.EncryptPKCS1v15(session, public, crypto.FromECDSA(s.signerKey))
+	ciphertext, err := rsa.EncryptOAEP(sha256.New(), session, public, crypto.FromECDSA(s.signerKey), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to encrypt key: %w", err)
 	}
@@ -223,7 +221,7 @@ func (s *Server) SetSignerKey(ctx context.Context, encrypted hexutil.Bytes) erro
 	defer func() {
 		_ = session.Close()
 	}()
-	decrypted, err := rsa.DecryptPKCS1v15(session, s.decryptionKey, encrypted)
+	decrypted, err := rsa.DecryptOAEP(sha256.New(), session, s.decryptionKey, encrypted, nil)
 	if err != nil {
 		return fmt.Errorf("failed to decrypt key: %w", err)
 	}
