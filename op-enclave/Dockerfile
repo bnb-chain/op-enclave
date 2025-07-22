@@ -33,10 +33,21 @@ WORKDIR /build
 
 ENV REPO=https://github.com/aws/aws-nitro-enclaves-image-format.git
 ENV COMMIT=483114f1da3bad913ad1fb7d5c00dadacc6cbae6
+
 RUN git init && \
     git remote add origin $REPO && \
     git fetch --depth=1 origin $COMMIT && \
-    git reset --hard FETCH_HEAD
+    git reset --hard FETCH_HEAD && \
+    # Verify the commit hash matches expected
+    if [ "$(git rev-parse HEAD)" != "$COMMIT" ]; then \
+        echo "ERROR: Commit hash verification failed. Expected: $COMMIT, Got: $(git rev-parse HEAD)"; \
+        exit 1; \
+    fi && \
+    # Additional security: verify the repository is from the expected source
+    if [ "$(git remote get-url origin)" != "$REPO" ]; then \
+        echo "ERROR: Repository URL verification failed"; \
+        exit 1; \
+    fi
 
 RUN cargo build --all --release
 

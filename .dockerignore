@@ -12,3 +12,16 @@ build/_workspace
 build/bin
 build/_bin
 tests/testdata
+
+# Sensitive files and credentials
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*secrets*
+*credentials*
+*.env.local
+*.env.production
+*.env.staging
+.env.*
