@@ -93,6 +93,7 @@ func NewServer() (*Server, error) {
 		random = rand.Reader
 		// only allow a signer key to be set in local mode
 		signerKeyEnv = os.Getenv("OP_ENCLAVE_SIGNER_KEY")
+		return nil, errors.New("failed to open Nitro Secure Module session, running in local mode")
 	} else {
 		defer func() {
 			_ = session.Close()
