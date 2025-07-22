@@ -10,8 +10,30 @@ on:
       - adapt_opbnb
 
 jobs:
+  # Add a new job for vulnerability scanning
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
   push-op-enclave:
     runs-on: ubuntu-latest
+    needs: security-scan
 
     steps:
       - uses: actions/checkout@v3
@@ -48,9 +70,24 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
           provenance: false
+          
+      - name: Scan Docker image for vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ghcr.io/${{ github.repository_owner }}/op-enclave:${{ steps.meta.outputs.version }}
+          format: 'sarif'
+          output: 'trivy-image-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          
+      - name: Upload Docker image scan results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-image-results.sarif'
 
   push-op-batcher:
     runs-on: ubuntu-latest
+    needs: security-scan
 
     steps:
       - uses: actions/checkout@v3
@@ -83,9 +120,24 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
           provenance: false
+          
+      - name: Scan Docker image for vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ghcr.io/${{ github.repository_owner }}/op-batcher:${{ steps.meta.outputs.version }}
+          format: 'sarif'
+          output: 'trivy-batcher-image-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          
+      - name: Upload Docker image scan results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-batcher-image-results.sarif'
 
   push-op-proposer:
     runs-on: ubuntu-latest
+    needs: security-scan
 
     steps:
       - uses: actions/checkout@v3
@@ -118,3 +170,17 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           platforms: linux/amd64
           provenance: false
+          
+      - name: Scan Docker image for vulnerabilities
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ghcr.io/${{ github.repository_owner }}/op-proposer:${{ steps.meta.outputs.version }}
+          format: 'sarif'
+          output: 'trivy-proposer-image-results.sarif'
+          severity: 'CRITICAL,HIGH'
+          
+      - name: Upload Docker image scan results
+        uses: github/codeql-action/upload-sarif@v2
+        if: always()
+        with:
+          sarif_file: 'trivy-proposer-image-results.sarif'
