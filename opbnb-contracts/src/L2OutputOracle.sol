@@ -119,6 +119,8 @@ contract L2OutputOracle is Initializable, ISemver {
             _startingTimestamp <= block.timestamp,
             "L2OutputOracle: starting L2 timestamp must be less than current time"
         );
+        require(_startingBlockNumber == 0, "L2OutputOracle: starting block number should be zero");
+        require(_proposer != address(0), "L2OutputOracle: proposer address shouldn't be zero");
 
         submissionInterval = _submissionInterval;
         l2BlockTime = _l2BlockTime;
@@ -133,8 +135,8 @@ contract L2OutputOracle is Initializable, ISemver {
         l2Outputs.push(
             Types.OutputProposal({
                 outputRoot: _genesisOutputRoot,
-                timestamp: uint128(block.timestamp),
-                l2BlockNumber: uint128(0)
+                timestamp: uint128(_startingTimestamp),
+                l2BlockNumber: uint128(_startingBlockNumber)
             })
         );
     }
@@ -179,12 +181,6 @@ contract L2OutputOracle is Initializable, ISemver {
         return finalizationPeriodSeconds;
     }
 
-    /// @notice Deletes all output proposals after and including the proposal that corresponds to
-    ///         the given output index. Only the challenger address can delete outputs.
-    /// @param _l2OutputIndex Index of the first L2 output to be deleted.
-    ///                       All outputs after this output will also be deleted.
-    function deleteL2Outputs(uint256 _l2OutputIndex) external {}
-
     /// @notice Accepts an outputRoot and the timestamp of the corresponding L2 block.
     ///         The timestamp must be equal to the current value returned by `nextTimestamp()` in
     ///         order to be accepted. This function may only be called by the Proposer.
@@ -202,6 +198,11 @@ contract L2OutputOracle is Initializable, ISemver {
         require(msg.sender == proposer, "L2OutputOracle: only the proposer address can propose new outputs");
 
         require(isL2TimestampValid(_l2BlockNumber), "L2OutputOracle: cannot propose L2 output in the future");
+
+        require(
+            _l2BlockNumber == latestBlockNumber() + 1,
+            "L2OutputOracle: submitted block number must be equal to next expected block number"
+        );
 
         require(_outputRoot != bytes32(0), "L2OutputOracle: L2 output proposal cannot be the zero hash");
 
